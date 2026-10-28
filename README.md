@@ -27,7 +27,7 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
-Every push to `main` deploys `site/` to GitHub Pages through `.github/workflows/pages.yml`.
+The live site is served by GitHub Pages from the `gh-pages` branch, which holds a copy of `site/`. To publish changes, copy the updated `site/*.html` files to `gh-pages` and push.
 
 > The team idea board in `walkthrough.html` saves posts only when the page is opened as a Claude artifact. Everywhere else it shows a notice and the rest of the page works normally.
 
