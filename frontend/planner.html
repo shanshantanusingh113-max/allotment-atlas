@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Atlas Buy Planner</title>
+<meta name="description" content="Plan TBO inventory pre-buys on a live 3D globe: forecast demand, budget optimisation, buy timing and Monte Carlo risk.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/planner.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+<div class="loading" id="loading" role="status"><div><i></i><span>Loading the model snapshot…</span></div></div>
+
+<nav class="nav" aria-label="Pages">
+  <div class="wrap">
+    <a class="brand" href="index.html">Atlas</a>
+    <div class="pages">
+      <a href="index.html">3D Lab</a>
+      <a href="planner.html" aria-current="page">Buy Planner</a>
+      <a href="walkthrough.html">Walkthrough</a>
+      <a href="#model">Model</a>
+    </div>
+    <button class="engine" id="engine" type="button" data-mode="loading" title="Which engine is answering"><i></i><b id="engineTxt">Connecting</b></button>
+  </div>
+</nav>
+
+<header class="wrap head">
+  <div class="eyebrow" id="planEyebrow">Buy Planner · plan date 2 Nov 2026</div>
+  <h1>Spend <span id="h1Budget">₹8 Cr</span> where demand will be</h1>
+  <p>Twenty-two candidate blocks of hotel rooms and flight seats across sixteen destinations. The engine forecasts each one, sizes it, times the purchase, and picks the mix that earns the most for the risk you accept. Change anything below and it re-plans instantly.</p>
+  <div class="kpis" aria-live="polite">
+    <div class="kpi k1"><small>Spend</small><b id="kSpend">–</b><span id="kSpendSub">of budget</span></div>
+    <div class="kpi k2"><small>Expected profit</small><b id="kProfit">–</b><span id="kRoi">return</span></div>
+    <div class="kpi k3"><small>Bad season (P10)</small><b id="kP10">–</b><span>1-in-10 outcome</span></div>
+    <div class="kpi k4"><small>Worst 5% average</small><b id="kCvar">–</b><span id="kLoss">chance of loss</span></div>
+    <div class="kpi k5"><small>Gain vs simple rule</small><b id="kUplift">–</b><span>risk-adjusted, vs greedy</span></div>
+  </div>
+</header>
+
+<main>
+<section class="wrap stage" aria-label="Plan on the globe">
+  <div>
+    <div class="globe-card">
+      <div id="globe" aria-label="3D globe. Bars show forecast demand per destination for the selected month; gold bars are destinations the plan buys."></div>
+      <div class="g-hud"><div class="month" id="gMonth">Dec 2026</div><div class="sub" id="gSub">Forecast demand · P50</div></div>
+      <div class="g-hint">Drag to spin · tap a bar</div>
+      <div class="g-legend"><span style="--c:var(--gold)">Plan buys hotels</span><span style="--c:var(--blue)">Plan buys seats</span><span style="--c:#C5CEDD">Not bought</span><span style="--c:var(--ink)">Hub</span></div>
+      <div class="g-tip" id="gTip"></div>
+    </div>
+    <div class="months" id="months" role="group" aria-label="Month"></div>
+  </div>
+
+  <div class="card controls" aria-label="Plan controls">
+    <label for="budget"><span>Budget <output id="oBudget">₹8.00 Cr</output></span><input id="budget" type="range" min="100" max="1500" step="10" value="800"></label>
+    <div style="display:grid;gap:6px;font-size:.88rem;font-weight:500">Risk appetite
+      <div class="seg" id="risk" role="group" aria-label="Risk appetite">
+        <button type="button" data-v="0" aria-pressed="false">Bold</button>
+        <button type="button" data-v="0.5" aria-pressed="true">Balanced</button>
+        <button type="button" data-v="1" aria-pressed="false">Careful</button>
+        <button type="button" data-v="2" aria-pressed="false">Very careful</button>
+      </div>
+    </div>
+    <label for="share"><span>Max share in one destination <output id="oShare">35%</output></span><input id="share" type="range" min="0.15" max="1" step="0.05" value="0.35"></label>
+    <div style="display:grid;gap:6px;font-size:.88rem;font-weight:500">Market shocks
+      <div class="shocks" id="shocks"></div>
+    </div>
+    <div>
+      <div class="alloc" id="alloc" aria-label="Spend split"></div>
+      <div class="key" style="margin-top:6px"><span style="--c:var(--gold)">Hotels</span><span style="--c:var(--blue)">Flights</span><span style="--c:var(--panel2)">Unspent</span></div>
+    </div>
+    <div class="row"><button class="btn" type="button" id="reset">Reset</button><span class="status" id="status" aria-live="polite"></span></div>
+  </div>
+</section>
+
+<section class="wrap sec t-gold" id="buys">
+  <div class="sec-head">
+    <div class="eyebrow">01 · Buy list</div>
+    <h2>What to buy, how much, and when</h2>
+    <p>Sorted by expected profit. Select a row to see why the engine chose it, the demand forecast behind it, and the best day to sign the contract.</p>
+  </div>
+  <div class="split">
+    <div class="tbl"><table>
+      <thead><tr><th>Block</th><th>Stay window</th><th class="r">Units</th><th class="r">Cost</th><th class="r">Exp. profit</th><th>Buy by</th><th>Sell-through</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+    <div class="card detail" id="detail" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="wrap sec t-coral" id="risk-sec">
+  <div class="sec-head">
+    <div class="eyebrow">02 · Risk</div>
+    <h2>Ten thousand seasons, one plan</h2>
+    <p>Demand is drawn with shared shocks, so blocks in the same destination and region rise and fall together. The spread is the risk; the frontier shows what each risk setting buys.</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="cap"><b>Profit distribution</b><span id="histCap"></span></div>
+      <svg class="chart" id="hist" viewBox="0 0 560 260" role="img" aria-label="Histogram of simulated profit"></svg>
+      <div class="stats" style="--tone:var(--coral)">
+        <div><b id="rP10">–</b><small>P10</small></div><div><b id="rP50">–</b><small>P50</small></div>
+        <div><b id="rP90">–</b><small>P90</small></div><div><b id="rSd">–</b><small>Std. dev.</small></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="cap"><b>Risk–return frontier</b><span>each dot is a risk setting at this budget</span></div>
+      <svg class="chart" id="front" viewBox="0 0 560 260" role="img" aria-label="Expected profit against risk for each risk setting"></svg>
+      <p class="muted" style="font-size:.84rem;margin-top:8px" id="frontNote"></p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap sec t-blue" id="model">
+  <div class="sec-head">
+    <div class="eyebrow">03 · Model</div>
+    <h2>Why you can trust the forecast</h2>
+    <p>The forecaster was tested walk-forward: trained on 18 months of synthetic history, scored on the next 26 weeks it never saw.</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="cap"><b>Forecast error (WAPE) by destination</b><span id="btCap"></span></div>
+      <svg class="chart" id="bt" viewBox="0 0 560 300" role="img" aria-label="Forecast error by destination"></svg>
+    </div>
+    <div class="card" style="display:grid;gap:12px;align-content:start">
+      <div class="cap"><b>Blocks the plan skipped</b><span id="skipCap"></span></div>
+      <div class="skips" id="skips"></div>
+    </div>
+  </div>
+  <div class="steps" style="margin-top:16px">
+    <div class="step" style="background:var(--ink)"><b>1 · Data</b><span>Two years of searches, bookings, sell-outs and cancellations with a festival calendar.</span><code>atlas/data</code></div>
+    <div class="step" style="background:var(--blue)"><b>2 · Forecast</b><span>Pooled quantile gradient boosting blended with an event-aware seasonal anchor.</span><code>atlas/forecast</code></div>
+    <div class="step" style="background:var(--gold);color:var(--ink)"><b>3 · Optimise</b><span>Newsvendor sizing, buy timing, and an exact grouped knapsack under the budget.</span><code>atlas/optimize</code></div>
+    <div class="step" style="background:var(--coral)"><b>4 · Stress-test</b><span>Correlated Monte Carlo gives P10, CVaR and the chance of a loss.</span><code>atlas/risk</code></div>
+  </div>
+  <div class="card" style="margin-top:16px;display:grid;gap:10px">
+    <div class="cap"><b>Connect the live API</b><span id="apiState"></span></div>
+    <p class="muted" style="font-size:.9rem">This page runs a browser copy of the engine on the model's exported snapshot. To use the live Python service, start it and open this page with <span class="mono">?api=</span> pointing at it.</p>
+    <div class="api-box">cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --port 8000
+# then open planner.html?api=http://localhost:8000</div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="eyebrow">Allotment Atlas</div>
+    <p>Synthetic data for the TBO Hackathon, Problem 1: Inventory Optimization. No real TBO, customer or supplier data is used. <a href="https://github.com/shanshantanusingh113-max/allotment-atlas" target="_blank" rel="noopener">Source on GitHub</a></p>
+  </div>
+</footer>
+
+<script type="module" src="assets/js/planner.js"></script>
+</body>
+</html>

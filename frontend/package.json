@@ -1,0 +1,9 @@
+{
+  "name": "allotment-atlas-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/engine.test.mjs",
+    "serve": "python3 -m http.server 5173"
+  }
+}
