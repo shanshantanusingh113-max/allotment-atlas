@@ -4,6 +4,8 @@
 
 Built for the TBO Hackathon, Problem 1: *Inventory Optimization*.
 
+**Live site:** https://shanshantanusingh113-max.github.io/allotment-atlas/  ·  **Walkthrough:** https://shanshantanusingh113-max.github.io/allotment-atlas/walkthrough.html
+
 ---
 
 ## What's in this repo
@@ -25,7 +27,7 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
-To publish with GitHub Pages: **Settings → Pages → Deploy from branch → `main` / `/site`**.
+Every push to `main` deploys `site/` to GitHub Pages through `.github/workflows/pages.yml`.
 
 > The team idea board in `walkthrough.html` saves posts only when the page is opened as a Claude artifact. Everywhere else it shows a notice and the rest of the page works normally.
 
