@@ -127,6 +127,38 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 .mc .hud-bottom{position:static;background:none;border:0;padding:0}
 .fallback{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted);font-size:.9rem}
 footer{padding-block:64px 48px;color:var(--muted);font-size:.88rem;display:grid;gap:12px;border-top:1px solid var(--line)}
+
+/* solid colour system: each simulation owns one tone */
+.t1{--tone:#F2A922;--on:#0F1B33}.t2{--tone:#2F5BD3;--on:#fff}.t3{--tone:#16865A;--on:#fff}.t4{--tone:#E4572E;--on:#fff}.t5{--tone:#6D3FD1;--on:#fff}
+.hero-stats div{border:0;box-shadow:none;color:var(--on)}
+.hero-stats div:nth-child(1){background:#0F1B33;--on:#fff}.hero-stats div:nth-child(2){background:#F2A922;--on:#0F1B33}.hero-stats div:nth-child(3){background:#2F5BD3;--on:#fff}.hero-stats div:nth-child(4){background:#E4572E;--on:#fff}
+.hero-stats b,.hero-stats small{color:var(--on)}.hero-stats small{opacity:.85}
+.index a{background:var(--tone);border:0;color:var(--on);min-height:150px;align-content:end;position:relative;overflow:hidden}
+.index a::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.14)}
+.index a:hover{box-shadow:0 12px 28px rgba(15,27,51,.18);border:0}
+.index a i,.index a span{color:var(--on);opacity:.9}
+.bay .eyebrow{display:inline-flex;justify-self:start;background:var(--tone);color:var(--on);padding:7px 10px;border-radius:6px;letter-spacing:.14em}
+.bay h2{color:var(--ink)}
+.bay h2::after{content:"";display:block;width:64px;height:6px;border-radius:3px;background:var(--tone);margin-top:14px}
+.bay .console{border-top:6px solid var(--tone)}
+.bay .btn.go{background:var(--tone);border-color:var(--tone);color:var(--on)}
+.bay .btn.go:hover{filter:brightness(.94);background:var(--tone)}
+.bay input[type=range]{accent-color:var(--tone)}
+.bay .stats div{border-top-color:var(--tone)}
+.bay .try div{border:0;background:var(--tone);color:var(--on)}
+.bay .try b{color:var(--on);opacity:.85}
+.bay .seg button[aria-pressed=true]{background:var(--tone);color:var(--on);box-shadow:none}
+.bay .vp{border:2px solid var(--tone)}
+.band{background:#0F1B33;color:#fff}
+.band .wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;padding-block:0}
+.band div.step{padding:22px 18px;display:grid;gap:4px;border-left:1px solid rgba(255,255,255,.12)}
+.band div.step:first-child{border-left:0}
+.band b{font:800 1.5rem/1 var(--f-display);text-transform:uppercase;color:var(--c)}
+.band span{font-size:.84rem;color:#C9D2E6}
+footer.solid{background:#0F1B33;color:#C9D2E6;border:0;max-width:none;padding-left:0;padding-right:0}
+footer.solid .inner{display:grid;gap:12px}
+footer.solid .eyebrow{color:#F2A922}
+footer.solid a{color:#9DB6F7}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 
@@ -159,17 +191,27 @@ footer{padding-block:64px 48px;color:var(--muted);font-size:.88rem;display:grid;
   </div>
 </header>
 
+<div class="band" aria-label="How the five simulations connect">
+  <div class="wrap">
+    <div class="step"><b style="--c:#F2A922">1 · Feel it</b><span>One hotel, one season, real trade-offs</span></div>
+    <div class="step"><b style="--c:#7FA0F5">2 · See the leak</b><span>Demand that hits sold-out</span></div>
+    <div class="step"><b style="--c:#46C08A">3 · Forecast</b><span>Fill in what isn't booked yet</span></div>
+    <div class="step"><b style="--c:#FF8A65">4 · Size the bet</b><span>Profit, risk and the best block</span></div>
+    <div class="step"><b style="--c:#B98AF0">5 · Spend it</b><span>One budget across sixteen bets</span></div>
+  </div>
+</div>
+
 <main>
 <div class="wrap index">
-  <a href="#season"><i>SIM 01</i><b>Season in a hotel</b><span>90 days of bookings, sell-outs and cancellations in one tower</span></a>
-  <a href="#swarm"><i>SIM 02</i><b>Agency swarm</b><span>Thousands of searches chasing limited stock</span></a>
-  <a href="#surface"><i>SIM 03</i><b>Forecast surface</b><span>Bookings on hand by stay date and days before arrival</span></a>
-  <a href="#landscape"><i>SIM 04</i><b>Profit landscape</b><span>Expected profit across every buy size, plus Monte Carlo</span></a>
-  <a href="#city"><i>SIM 05</i><b>Portfolio city</b><span>Sixteen bets compete for one budget under market shocks</span></a>
+  <a class="t1" href="#season"><i>SIM 01</i><b>Season in a hotel</b><span>90 days of bookings, sell-outs and cancellations in one tower</span></a>
+  <a class="t2" href="#swarm"><i>SIM 02</i><b>Agency swarm</b><span>Thousands of searches chasing limited stock</span></a>
+  <a class="t3" href="#surface"><i>SIM 03</i><b>Forecast surface</b><span>Bookings on hand by stay date and days before arrival</span></a>
+  <a class="t4" href="#landscape"><i>SIM 04</i><b>Profit landscape</b><span>Expected profit across every buy size, plus Monte Carlo</span></a>
+  <a class="t5" href="#city"><i>SIM 05</i><b>Portfolio city</b><span>Sixteen bets compete for one budget under market shocks</span></a>
 </div>
 
 <!-- SIM 1 -->
-<section class="bay wrap" id="season">
+<section class="bay wrap t1" id="season">
   <div class="bay-head">
     <div class="eyebrow">Simulation 01 · Season in a hotel</div>
     <h2>Ninety days in one tower</h2>
@@ -215,7 +257,7 @@ footer{padding-block:64px 48px;color:var(--muted);font-size:.88rem;display:grid;
 </section>
 
 <!-- SIM 2 -->
-<section class="bay wrap" id="swarm">
+<section class="bay wrap t2" id="swarm">
   <div class="bay-head">
     <div class="eyebrow">Simulation 02 · Agency swarm</div>
     <h2>Searches chasing stock</h2>
@@ -255,7 +297,7 @@ footer{padding-block:64px 48px;color:var(--muted);font-size:.88rem;display:grid;
 </section>
 
 <!-- SIM 3 -->
-<section class="bay wrap" id="surface">
+<section class="bay wrap t3" id="surface">
   <div class="bay-head">
     <div class="eyebrow">Simulation 03 · Forecast surface</div>
     <h2>The demand time surface</h2>
@@ -289,11 +331,11 @@ footer{padding-block:64px 48px;color:var(--muted);font-size:.88rem;display:grid;
 </section>
 
 <!-- SIM 4 -->
-<section class="bay wrap" id="landscape">
+<section class="bay wrap t4" id="landscape">
   <div class="bay-head">
     <div class="eyebrow">Simulation 04 · Profit landscape</div>
     <h2>The shape of a good bet</h2>
-    <p>Expected profit for every block size (left to right) and every level of forecast uncertainty (front to back), for demand averaging 110 rooms. Gold peaks are profitable; red valleys lose money. The white ridge is the best buy size at each uncertainty. Change the prices and the terrain reshapes.</p>
+    <p>Expected profit for every block size (left to right) and every level of forecast uncertainty (front to back), for demand averaging 110 rooms. Gold peaks are profitable; red valleys lose money. The dark ridge is the best buy size at each uncertainty. Change the prices and the terrain reshapes.</p>
   </div>
   <div class="lab">
     <div class="vp" id="landVp">
@@ -338,7 +380,7 @@ footer{padding-block:64px 48px;color:var(--muted);font-size:.88rem;display:grid;
 </section>
 
 <!-- SIM 5 -->
-<section class="bay wrap" id="city">
+<section class="bay wrap t5" id="city">
   <div class="bay-head">
     <div class="eyebrow">Simulation 05 · Portfolio city</div>
     <h2>Sixteen bets, one budget</h2>
@@ -375,10 +417,10 @@ footer{padding-block:64px 48px;color:var(--muted);font-size:.88rem;display:grid;
 </section>
 </main>
 
-<footer class="wrap">
+<footer class="solid"><div class="wrap inner">
   <div class="eyebrow">About this lab</div>
   <p>All data is synthetic and every model is simplified for clarity: normal demand, Poisson arrivals, a greedy optimizer in place of the integer solver the real build would use. The full plan, glossary, idea matrix and team board live in the <a href="walkthrough.html" target="_blank" rel="noopener">Allotment Atlas walkthrough</a>.</p>
-</footer>
+</div></footer>
 
 <script>
 (function(){
@@ -490,8 +532,8 @@ function initTower(){
   const ground=new THREE.Mesh(new THREE.CircleGeometry(9,64),new THREE.MeshStandardMaterial({color:0xEEF1F7,roughness:.9}));ground.rotation.x=-Math.PI/2;st.scene.add(ground);
   const gridH=new THREE.GridHelper(18,36,0xC9D2E1,0xE1E6EF);gridH.position.y=.005;st.scene.add(gridH);
   const W=Cc*.52+.3,H=F*.46+.3;
-  const core=new THREE.Mesh(new THREE.BoxGeometry(W-.2,H,.34),new THREE.MeshStandardMaterial({color:0xD6DDE9,roughness:.7}));core.position.y=H/2;st.scene.add(core);
-  const slabM=new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:.6});
+  const core=new THREE.Mesh(new THREE.BoxGeometry(W-.2,H,.34),new THREE.MeshStandardMaterial({color:0x1E2D50,roughness:.7}));core.position.y=H/2;st.scene.add(core);
+  const slabM=new THREE.MeshStandardMaterial({color:0x2B3D66,roughness:.6});
   for(let f=0;f<=F;f++){const s=new THREE.Mesh(new THREE.BoxGeometry(W,.05,1.12),slabM);s.position.y=.1+f*.46;st.scene.add(s);}
   const roof=new THREE.Mesh(new THREE.BoxGeometry(2.2,.5,.8),slabM);roof.position.y=H+.25;st.scene.add(roof);
   const sign=label('GOA · 31 DEC',{size:.32,color:'#C98200'});sign.position.set(0,H+.95,0);st.scene.add(sign);
@@ -510,7 +552,7 @@ function initTower(){
     if(dirty){d.scale.setScalar(1);im.instanceMatrix.needsUpdate=true;}};
   towerReset();
 }
-const TC=[0xF3F5F9,0x9FAAC0,0xF6DDA5,0xF2A922,0x4F7BE6,0xD9472F];
+const TC=[0x3A4D78,0x9FAAC0,0xF6DDA5,0xF2A922,0x4F7BE6,0xD9472F];
 const tState={Q:60,dem:'normal',cx:.12,speed:2,playing:false};
 const DEM={low:{mu:45,fill:.62},normal:{mu:75,fill:.92},festival:{mu:118,fill:1.25}};
 const TD=90,TP=8500,TCst=6000,TS=1500,TM=900;
