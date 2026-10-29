@@ -16,6 +16,8 @@ Money is in INR. `budget_lakh` is in lakh (100 = ₹1 Cr).
 | GET | `/api/frontier?budget_lakh=800&shocks=…` | Expected profit, SD and P10 for risk aversion 0 to 2 |
 | GET | `/api/timing/{block_id}?shocks=…` | Expected profit by buy day and the best day |
 | POST | `/api/newsvendor` | Single-block sizing with a profit curve |
+| POST | `/api/sensitivity` | For each input pushed low and high: expected profit with the plan fixed (`*_fixed`) and after re-planning for the same risk setting (`*_replanned`) |
+| POST | `/api/replay?seed=1` | One simulated season, week by week, for Atlas, the simple rule and last year's volume, plus a 2,000-season scorecard (`avg_final`, `p10_final`, `win_rate`) |
 
 ## POST /api/optimize
 
@@ -60,3 +62,7 @@ Errors return HTTP 422 with a `detail` message, for example an unknown shock id 
 | `cyclone` | Phuket and Bali demand ×0.7, σ ×1.6 |
 | `bangkok_concert` | Bangkok demand ×1.35 |
 | `fuel_spike` | Flight block costs ×1.12 |
+
+## POST /api/sensitivity and /api/replay
+
+Both take the same body as `/api/optimize`. `*_replanned` maximises risk-adjusted profit, so with a risk appetite above Bold its *expected* profit can sit slightly below the fixed plan's. Replay draws use NumPy's generator in the API and a seeded JavaScript generator in the browser, so the same seed gives different (but statistically equivalent) seasons in each engine.

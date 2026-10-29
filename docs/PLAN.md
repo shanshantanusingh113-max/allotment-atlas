@@ -14,7 +14,7 @@ Allotment Atlas is TBO Hackathon Problem 1, *Inventory Optimization*. TBO can pr
 
 ## 2. Scope
 
-**In scope:** synthetic data generator, forecaster with backtest, sizing, timing, portfolio optimiser, Monte Carlo, plain-language explanations, a REST API, three web pages (3D Lab, Buy Planner, Walkthrough), tests and CI.
+**In scope:** synthetic data generator, forecaster with backtest, sizing, timing, portfolio optimiser, Monte Carlo, sensitivity and season replay, plain-language explanations, a REST API, four web pages (landing, Buy Planner, 3D Lab, Walkthrough), tests and CI.
 
 **Out of scope for the hackathon:** real TBO data connections, live supplier rate feeds, sign-in and roles, writing back to booking systems. Section 6 shows where each would plug in.
 
@@ -26,9 +26,10 @@ allotment-atlas/
 │   ├── atlas/          data · forecast · optimize · risk · explain · pipeline
 │   ├── app/            HTTP API (FastAPI)
 │   ├── scripts/        export_frontend.py, generate_data.py
-│   └── tests/          51 pytest tests
+│   └── tests/          55 pytest tests
 ├── frontend/           Static site (GitHub Pages)
-│   ├── index.html      3D Lab: five teaching simulations
+│   ├── index.html      Landing page
+│   ├── lab.html        3D Lab: five teaching simulations
 │   ├── planner.html    Buy Planner: the full engine on a 3D globe
 │   ├── walkthrough.html Plan walkthrough, glossary, idea matrix, team board
 │   ├── assets/css, assets/js
@@ -49,7 +50,8 @@ allotment-atlas/
 | M4 | Risk engine and shocks | Monte Carlo with correlated shocks; five scenarios | ✅ |
 | M5 | API and Buy Planner | FastAPI service; planner switches between API and browser engine | ✅ |
 | M6 | Tests, CI, deploy | 51 backend tests, parity test, GitHub Pages | ✅ |
-| M7 | Hackathon polish | Rehearse demo, record backup video, swap in TBO data if provided | Next |
+| M7 | Decision tools | Command bar, buy calendar, tornado, season replay, scenarios, CSV, landing page | ✅ |
+| M8 | Hackathon polish | Rehearse demo, record backup video, swap in TBO data if provided | Next |
 
 ## 5. Team split (four people)
 

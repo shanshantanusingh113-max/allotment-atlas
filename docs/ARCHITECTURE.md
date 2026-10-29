@@ -52,6 +52,10 @@ The walk-forward backtest (26 held-out weeks) gives model WAPE 8.5%, seasonal-na
 ### Risk (`backend/atlas/risk/montecarlo.py`)
 `z = √0.15·Z_global + √0.20·Z_region + √0.25·Z_dest + √0.40·ε`. 10,000 seasons per plan produce the mean, SD, P5/P10/P50/P90, CVaR 5%, P(loss), a histogram and per-block sell-through.
 
+### Analyse (`backend/atlas/analysis.py`)
+- **sensitivity():** six factors (demand ±15%, price ±5%, supplier rate ±5%, σ ±30%, recovery ±50%, flight cost ±10%). For each, expected profit with the plan held fixed and after re-planning.
+- **replay():** one correlated draw of realised demand. Each policy pays its spend on the plan date and earns revenue as stays happen. Policies: Atlas, the greedy ratio rule, and last year's volume (scaled to the budget). A 2,000-season scorecard reports average, P10 and how often each policy finishes first.
+
 ### Explain (`backend/atlas/explain.py`)
 Templates only: every figure in a sentence comes from the engine.
 
@@ -62,4 +66,6 @@ FastAPI with CORS. The engine trains once at startup in about 10 seconds. See `d
 - **planner.html:** a three.js globe whose bars are monthly P50 demand, coloured by what the plan buys, with arcs from hubs. It also shows the buy list, detail drawer (explanation, forecast chart, timing chart), Monte Carlo histogram, frontier and backtest.
 - **engine.js:** a line-for-line port of the optimiser, timing, Monte Carlo and explanations. `frontend/tests/engine.test.mjs` asserts that it reproduces the Python plan exactly (same blocks, quantities, spend and buy-by dates).
 - **api.js:** uses the API when `?api=` is set, or on localhost, and otherwise the browser engine.
-- **index.html** (3D Lab) and **walkthrough.html** are teaching pages.
+- **index.html:** the landing page, with live numbers, an auto-playing globe and an in-page planner.
+- **planner.html** also has a rule-based command bar, buy calendar and alerts, tornado, season race, scenario compare (localStorage), CSV export and URL parameters.
+- **lab.html** (3D Lab) and **walkthrough.html** are teaching pages.

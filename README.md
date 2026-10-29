@@ -6,7 +6,7 @@ TBO Hackathon, Problem 1: *Inventory Optimization*.
 
 **Live site:** https://shanshantanusingh113-max.github.io/allotment-atlas/
 · [Buy Planner](https://shanshantanusingh113-max.github.io/allotment-atlas/planner.html)
-· [3D Lab](https://shanshantanusingh113-max.github.io/allotment-atlas/index.html)
+· [3D Lab](https://shanshantanusingh113-max.github.io/allotment-atlas/lab.html)
 · [Walkthrough](https://shanshantanusingh113-max.github.io/allotment-atlas/walkthrough.html)
 
 ---
@@ -20,7 +20,24 @@ TBO Hackathon, Problem 1: *Inventory Optimization*.
 | Plan at ₹8 Cr budget | 22 blocks, **₹2.03 Cr** expected profit (25.7% return) |
 | Exact optimiser vs a simple ratio rule | **+₹39.6 L** risk-adjusted |
 | Bad season (P10) / worst 5% average | ₹1.95 Cr / ₹1.76 Cr, 0% chance of a loss |
+| 2,000 simulated seasons at ₹8 Cr | Atlas finishes first in 58%; averages ₹18.7 L more than the simple rule with a ₹48 L better bad season |
 | Browser engine vs Python | Same blocks, quantities and spend; re-plans in under 100 ms |
+
+## Features
+
+| | |
+|---|---|
+| **Landing page** | Live headline numbers, an auto-playing demand globe, and an in-page planner you can try |
+| **3D demand globe** | Bars rise and fall with each month's forecast; colour shows what the plan buys; arcs show spend from each hub |
+| **Ask the planner** | Plain-English commands: "budget 12 crore, careful, gulf advisory", "cut 3 crore", "show July", "why Makkah" |
+| **Buy list with reasons** | Units, cost, expected profit, buy-by date and a one-sentence explanation per block; CSV export |
+| **Buy calendar and alerts** | Each contract's best signing day against its stay window; this week's deadlines flagged |
+| **Risk** | 10,000 correlated seasons, P10, worst-5% average, chance of loss, risk–return frontier, five market shocks |
+| **What moves profit** | Tornado chart of price, supplier rate, flight costs, uncertainty, demand and recovery |
+| **Season replay** | One simulated year races Atlas against the simple rule and last year's volume, plus a 2,000-season scorecard |
+| **Scenario compare** | Save up to four plans and compare spend, profit, bad season and what changed |
+| **Shareable links** | `planner.html?budget=1200&risk=1&shocks=cyclone` opens with those settings |
+| **Live API or offline** | Uses the FastAPI service when reachable; otherwise the browser engine, tested to match Python |
 
 ## Repository
 
@@ -32,15 +49,17 @@ allotment-atlas/
 │   │   ├── forecast/        quantile gradient boosting + event-aware anchor + conformal bands
 │   │   ├── optimize/        newsvendor · buy timing · exact budget portfolio
 │   │   ├── risk/            correlated Monte Carlo
+│   │   ├── analysis.py      sensitivity (tornado) and season replay
 │   │   ├── explain.py       plain-language reasons
 │   │   └── pipeline.py      Engine: data → forecast → decide → simulate
 │   ├── app/                 FastAPI routes and schemas
 │   ├── scripts/             export_frontend.py · generate_data.py
-│   ├── tests/               51 pytest tests
+│   ├── tests/               55 pytest tests
 │   └── Dockerfile
 ├── frontend/                Static site (GitHub Pages)
+│   ├── index.html           Landing page
 │   ├── planner.html         Buy Planner: the full engine on a 3D globe
-│   ├── index.html           3D Lab: five teaching simulations
+│   ├── lab.html             3D Lab: five teaching simulations
 │   ├── walkthrough.html     Plan walkthrough, glossary, idea matrix, team board
 │   ├── assets/{css,js}/     styles · engine.js · api.js · charts.js · page scripts
 │   ├── data/atlas.json      model snapshot exported by the backend
@@ -57,7 +76,7 @@ allotment-atlas/
 # 1. Backend
 cd backend
 pip install -r requirements-dev.txt
-python -m pytest                      # 51 tests
+python -m pytest                      # 55 tests
 uvicorn app.main:app --port 8000      # API docs at http://localhost:8000/docs
 
 # 2. Frontend (in another terminal)
@@ -80,6 +99,7 @@ With Docker: `docker compose up --build`. The site is then on http://localhost:8
 5. **Choose:** an exact grouped-knapsack DP maximises `E[profit] − λ·SD` under the budget and a per-destination cap.
 6. **Stress-test:** 10,000 correlated seasons give P10, CVaR 5% and the chance of a loss; five market shocks re-plan instantly.
 7. **Explain:** one sentence per pick, built only from engine numbers.
+8. **Analyse:** a tornado of the inputs that move profit, and a season replay against two common buying rules.
 
 Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · API: [docs/API.md](docs/API.md) · Plan and roadmap: [docs/PLAN.md](docs/PLAN.md) · Demo script: [docs/DEMO.md](docs/DEMO.md)
 
