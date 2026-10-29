@@ -26,9 +26,10 @@ allotment-atlas/
 │   ├── atlas/          data · forecast · optimize · risk · explain · pipeline
 │   ├── app/            HTTP API (FastAPI)
 │   ├── scripts/        export_frontend.py, generate_data.py
-│   └── tests/          55 pytest tests
+│   └── tests/          59 pytest tests
 ├── frontend/           Static site (GitHub Pages)
 │   ├── index.html      Landing page
+│   ├── data.html       Data explorer and downloads
 │   ├── lab.html        3D Lab: five teaching simulations
 │   ├── planner.html    Buy Planner: the full engine on a 3D globe
 │   ├── walkthrough.html Plan walkthrough, glossary, idea matrix, team board
@@ -45,13 +46,15 @@ allotment-atlas/
 |---|---|---|---|
 | M0 | Problem chosen, plan and explainer pages | Walkthrough and 3D Lab live | ✅ |
 | M1 | Synthetic data with planted patterns | Generator reproduces seasonality, festivals, growth, sell-outs | ✅ |
-| M2 | Forecaster beats seasonal naive | Backtest WAPE 8.5% vs 10.0%; P10–P90 coverage 83% | ✅ |
-| M3 | Sizing, timing and exact portfolio | DP matches brute force; beats greedy by ₹39.6 L at ₹8 Cr | ✅ |
+| M2 | Forecaster beats seasonal naive | Backtest WAPE 9.0% vs 11.2%; P10–P90 coverage 84% | ✅ |
+| M3 | Sizing, timing and exact portfolio | DP matches brute force; beats greedy by ₹51 L at ₹8 Cr | ✅ |
 | M4 | Risk engine and shocks | Monte Carlo with correlated shocks; five scenarios | ✅ |
 | M5 | API and Buy Planner | FastAPI service; planner switches between API and browser engine | ✅ |
 | M6 | Tests, CI, deploy | 51 backend tests, parity test, GitHub Pages | ✅ |
 | M7 | Decision tools | Command bar, buy calendar, tornado, season replay, scenarios, CSV, landing page | ✅ |
-| M8 | Hackathon polish | Rehearse demo, record backup video, swap in TBO data if provided | Next |
+| M8 | Bigger, swappable data | 28 destinations, 40 blocks, 9 shocks; JSON catalog; CSV loader; Data page; animations | ✅ |
+| M9 | Generic product | Unit types, currency, contract terms, upload, configurable constraints (see GENERALISE.md) | Next |
+| M10 | Hackathon polish | Rehearse demo, record backup video, swap in TBO data if provided | Next |
 
 ## 5. Team split (four people)
 

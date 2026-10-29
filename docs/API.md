@@ -7,11 +7,11 @@ Money is in INR. `budget_lakh` is in lakh (100 = ₹1 Cr).
 | Method | Path | What it returns |
 |---|---|---|
 | GET | `/health` | `{status, version, plan_date, destinations, candidates}` |
-| GET | `/api/destinations` | 16 destinations with coordinates, hub, 12-month P50 forecast, growth and sell-out share |
+| GET | `/api/destinations` | 28 destinations with coordinates, hub, 12-month P50 forecast, growth and sell-out share |
 | GET | `/api/forecast/{dest}?history_weeks=52` | Weekly history (`demand`, `lost`) and 56-week forecast (`p10`, `p50`, `p90`, `drivers`) |
 | GET | `/api/backtest` | Walk-forward WAPE vs seasonal naive, coverage, per-destination error |
 | GET | `/api/shocks` | Scenario ids, labels and descriptions |
-| GET | `/api/candidates?shocks=…` | 22 blocks with μ, σ, P10/P90, price, cost, salvage, critical ratio, Q*, expected profit |
+| GET | `/api/candidates?shocks=…` | 40 blocks with μ, σ, P10/P90, price, cost, salvage, critical ratio, Q*, expected profit |
 | POST | `/api/optimize` | The plan (see below) |
 | GET | `/api/frontier?budget_lakh=800&shocks=…` | Expected profit, SD and P10 for risk aversion 0 to 2 |
 | GET | `/api/timing/{block_id}?shocks=…` | Expected profit by buy day and the best day |
@@ -37,17 +37,17 @@ Response (abridged):
 {
   "plan_date": "2026-11-02",
   "summary": {
-    "spent": 79025000, "budget": 80000000, "expected_profit": 20267165,
-    "objective": 19225263, "blocks": 22, "roi": 0.2565,
-    "greedy_objective": 15267642, "uplift_vs_greedy": 3957620
+    "spent": 78541000, "budget": 80000000, "expected_profit": 20821983,
+    "objective": 20012444, "blocks": 36, "roi": 0.2651,
+    "greedy_objective": 14912403, "uplift_vs_greedy": 5100040
   },
   "picks": [{
-    "id": "MKK-RAM", "label": "Makkah hotels, Ramadan", "units": 1630,
-    "cost": 9943000, "expected_profit": 2551901, "buy_by": "2026-11-03",
-    "explanation": "Buy 1,630 room-nights for Makkah hotels, Ramadan (8 Feb – 9 Mar 2027). …"
+    "id": "MKK-RAM", "label": "Makkah hotels, Ramadan", "units": 1050,
+    "cost": 6405000, "expected_profit": "…", "buy_by": "2026-11-03",
+    "explanation": "Buy 1,050 room-nights for Makkah hotels, Ramadan (8 Feb – 9 Mar 2027). …"
   }],
   "skipped": [{"id": "…", "explanation": "Skip …: other blocks earn more per rupee of budget."}],
-  "risk": {"mean": 20263219, "p10": 19463634, "cvar5": 17606165, "prob_loss": 0.0, "histogram": [ … ], "by_block": { … }}
+  "risk": {"mean": "…", "p10": 20500264, "cvar5": 19228085, "prob_loss": 0.0, "histogram": [ … ], "by_block": { … }}
 }
 ```
 
@@ -62,6 +62,10 @@ Errors return HTTP 422 with a `detail` message, for example an unknown shock id 
 | `cyclone` | Phuket and Bali demand ×0.7, σ ×1.6 |
 | `bangkok_concert` | Bangkok demand ×1.35 |
 | `fuel_spike` | Flight block costs ×1.12 |
+| `nepal_quake` | Kathmandu demand ×0.55, σ ×1.7 |
+| `weak_yen` | Tokyo demand ×1.4 |
+| `schengen_delay` | Paris demand ×0.75, σ ×1.3 |
+| `hajj_quota` | Makkah demand ×1.25 |
 
 ## POST /api/sensitivity and /api/replay
 
