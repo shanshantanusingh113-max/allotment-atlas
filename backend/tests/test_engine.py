@@ -58,3 +58,29 @@ def test_timing_curve_has_best_point(engine):
     t = engine.timing("DPS-SUM")
     assert t["best"] is not None
     assert 7 <= t["best"]["lead_days"] <= t["reference_lead"]
+
+
+def test_sensitivity_ranks_factors(engine):
+    s = engine.sensitivity(OptimizeRequest())
+    swings = [f["swing"] for f in s["factors"]]
+    assert swings == sorted(swings, reverse=True)
+    price = next(f for f in s["factors"] if f["id"] == "price")
+    assert price["high_fixed"] > s["base_expected_profit"] > price["low_fixed"]
+
+
+def test_replay_is_reproducible_and_scored(engine):
+    a = engine.replay(OptimizeRequest(), seed=3)
+    b = engine.replay(OptimizeRequest(), seed=3)
+    assert a == b
+    assert {p["id"] for p in a["policies"]} == {"atlas", "greedy", "last_year"}
+    for p in a["policies"]:
+        assert len(p["series"]) == len(a["weeks"]) == 52
+        assert p["series"][0] <= 0 < p["spent"]  # cash goes out first
+    wins = sum(p["win_rate"] for p in a["policies"])
+    assert abs(wins - 1) < 1e-6
+    atlas = next(p for p in a["policies"] if p["id"] == "atlas")
+    assert atlas["win_rate"] == max(p["win_rate"] for p in a["policies"])
+
+
+def test_last_year_volume_is_populated(engine):
+    assert all(c["last_year"] > 0 for c in engine.candidates())

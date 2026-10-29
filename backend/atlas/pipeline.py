@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from . import __version__
+from . import analysis
 from .data.catalog import (BLOCK_BY_ID, BLOCKS, DEST_BY_CODE, DESTINATIONS, HUBS, SHOCK_BY_ID,
                            SHOCKS, Block)
 from .data.generator import generate_history, weekly
@@ -114,6 +115,14 @@ class Engine:
         peak_index = (mu / max(1, b.nights)) / max(1e-9, daily_avg)
         return mu * net, sigma * net, peak_index, lo * net, ", ".join(dict.fromkeys(drivers))
 
+    def _last_year(self, b: Block) -> float:
+        """Demand this block would have served over the same window 52 weeks earlier."""
+        h = self.history
+        lo, hi = pd.Timestamp(b.start - timedelta(days=364)), pd.Timestamp(b.end - timedelta(days=364))
+        rows = h[(h["dest"] == b.dest) & (h["date"] >= lo) & (h["date"] <= hi)]
+        net = b.share * (1 - 0.5 * DEST_BY_CODE[b.dest].cancel_rate)
+        return round(float((rows["bookings"] + rows["lost"]).sum()) * net, 1)
+
     def candidates(self, shocks: tuple[str, ...] = ()) -> list[dict]:
         active = [SHOCK_BY_ID[s] for s in shocks if s in SHOCK_BY_ID]
         out = []
@@ -134,6 +143,7 @@ class Engine:
             q = newsvendor.optimal_quantity(mu, sigma, b.price, cost, b.salvage)
             o = newsvendor.evaluate(q, mu, sigma, b.price, cost, b.salvage)
             out.append({
+                "last_year": self._last_year(b),
                 "id": b.id, "dest": b.dest, "dest_name": d.name, "label": b.label, "kind": b.kind,
                 "contract": b.contract, "region": d.region, "hub": d.hub,
                 "start": b.start, "end": b.end, "nights": b.nights,
@@ -235,6 +245,14 @@ class Engine:
                         "p10": r["p10"], "spent": round(sol.spent), "blocks": len(sol.picks)})
         return pts
 
+    def sensitivity(self, req: OptimizeRequest) -> dict:
+        return analysis.sensitivity(self.candidates(tuple(req.shocks)), self._choices,
+                                    req.budget_lakh, req.risk_aversion, req.max_share)
+
+    def replay(self, req: OptimizeRequest, seed: int = 1) -> dict:
+        return analysis.replay(self.candidates(tuple(req.shocks)), self._choices, PLAN_DATE,
+                               req.budget_lakh, req.risk_aversion, req.max_share, seed)
+
     def timing(self, block_id: str, shocks: tuple[str, ...] = ()) -> dict:
         if block_id not in BLOCK_BY_ID:
             raise KeyError(block_id)
@@ -263,6 +281,7 @@ class Engine:
             "forecasts": {d.code: self.forecast_series(d.code) for d in DESTINATIONS},
             "backtest": self.backtest,
             "default_plan": default,
+            "default_sensitivity": self.sensitivity(OptimizeRequest()),
         }
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, separators=(",", ":"), default=str))

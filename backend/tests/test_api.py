@@ -49,3 +49,10 @@ def test_timing_and_frontier(client):
     assert client.get("/api/timing/NOPE").status_code == 404
     pts = client.get("/api/frontier", params={"budget_lakh": 600}).json()
     assert len(pts) >= 5
+
+
+def test_sensitivity_and_replay_endpoints(client):
+    s = client.post("/api/sensitivity", json={"budget_lakh": 500})
+    assert s.status_code == 200 and len(s.json()["factors"]) == 6
+    r = client.post("/api/replay?seed=7", json={"budget_lakh": 500})
+    assert r.status_code == 200 and r.json()["seed"] == 7

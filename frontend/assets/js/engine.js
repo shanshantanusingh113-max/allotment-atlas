@@ -221,6 +221,114 @@ export function explainPick(c, units, lead, planDate) {
   return parts.join(' ');
 }
 
+
+// --------------------------------------------------------------- analysis
+const FACTORS = [
+  ['demand', 'Demand level', '−15%', '+15%', (c, s) => [c.mu * (1 + 0.15 * s), c.sigma * (1 + 0.15 * s), c.price, c.cost, c.salvage]],
+  ['price', 'Selling price', '−5%', '+5%', (c, s) => [c.mu, c.sigma, c.price * (1 + 0.05 * s), c.cost, c.salvage]],
+  ['cost', 'Supplier rate', '+5%', '−5%', (c, s) => [c.mu, c.sigma, c.price, c.cost * (1 - 0.05 * s), c.salvage]],
+  ['sigma', 'Forecast uncertainty', '+30%', '−30%', (c, s) => [c.mu, c.sigma * (1 - 0.30 * s), c.price, c.cost, c.salvage]],
+  ['salvage', 'Recovery on unsold', '−50%', '+50%', (c, s) => [c.mu, c.sigma, c.price, c.cost, c.salvage * (1 + 0.5 * s)]],
+  ['flights', 'Flight seat costs', '+10%', '−10%', (c, s) => [c.mu, c.sigma, c.price, c.kind === 'flight' ? c.cost * (1 - 0.10 * s) : c.cost, c.salvage]],
+];
+function rebuild(c, mu, sigma, price, cost, salvage) {
+  cost = Math.min(cost, price - 1); salvage = Math.min(salvage, cost - 1);
+  const q = optimalQuantity(mu, sigma, price, cost, salvage), o = evaluate(q, mu, sigma, price, cost, salvage);
+  return { ...c, mu, sigma, price, cost, salvage, q_star: pyRound(q), expected_profit: o.expected_profit, profit_sd: o.profit_sd };
+}
+function planProfit(cands, units) {
+  const by = Object.fromEntries(cands.map(c => [c.id, c])); let t = 0;
+  for (const [b, u] of units) { const c = by[b]; t += evaluate(u, c.mu, c.sigma, c.price, c.cost, c.salvage).expected_profit; }
+  return t;
+}
+const unitsOf = sol => new Map([...sol.picks].map(([b, o]) => [b, o.units]));
+
+export function sensitivity(cands, budget, lam, share) {
+  const units = unitsOf(solve(buildChoices(cands), budget, lam, share)), base = planProfit(cands, units);
+  const factors = FACTORS.map(([id, label, low_label, high_label, fn]) => {
+    const out = { id, label, low_label, high_label };
+    for (const [side, sign] of [['low', -1], ['high', 1]]) {
+      const moved = cands.map(c => rebuild(c, ...fn(c, sign)));
+      out[`${side}_fixed`] = Math.round(planProfit(moved, units));
+      out[`${side}_replanned`] = Math.round(planProfit(moved, unitsOf(solve(buildChoices(moved), budget, lam, share))));
+    }
+    out.swing = Math.abs(out.high_fixed - out.low_fixed);
+    return out;
+  }).sort((a, b) => b.swing - a.swing);
+  return { base_expected_profit: Math.round(base), factors };
+}
+
+function lastYearUnits(cands, budget) {
+  let units = new Map(cands.map(c => [c.id, pyRound((c.last_year || 0) / 10) * 10]));
+  const by = Object.fromEntries(cands.map(c => [c.id, c]));
+  let total = 0; for (const [b, u] of units) total += u * by[b].cost;
+  const cap = budget * LAKH;
+  if (total > cap && cap > 0) { const f = cap / total; units = new Map([...units].map(([b, u]) => [b, Math.floor(u * f / 10) * 10])); }
+  return new Map([...units].filter(([, u]) => u > 0));
+}
+
+export function replay(cands, planDate, budget, lam, share, seed = 1, weeks = 52) {
+  const choices = buildChoices(cands);
+  const plans = { atlas: unitsOf(solve(choices, budget, lam, share)), greedy: unitsOf(greedy(choices, budget, lam)), last_year: lastYearUnits(cands, budget) };
+  const rng = mulberry32(seed * 7919 + 13);
+  const g = GLOBAL_CORRELATION, r = REGION_CORRELATION - GLOBAL_CORRELATION, dd = DEST_CORRELATION, idio = Math.max(0, 1 - g - r - dd);
+  const one = () => normals(rng, 1)[0];
+  const zg = one(), zr = {}, zd = {}, realised = {};
+  for (const c of cands) {
+    if (zr[c.region] === undefined) zr[c.region] = one();
+    if (zd[c.dest] === undefined) zd[c.dest] = one();
+    const z = Math.sqrt(g) * zg + Math.sqrt(r) * zr[c.region] + Math.sqrt(dd) * zd[c.dest] + Math.sqrt(idio) * one();
+    realised[c.id] = Math.max(0, c.mu + c.sigma * z);
+  }
+  const p0 = parseDate(planDate), weekStarts = Array.from({ length: weeks }, (_, k) => addDays(p0, 7 * k));
+  const by = Object.fromEntries(cands.map(c => [c.id, c]));
+  const run = units => {
+    let spent = 0, soldT = 0, unsoldT = 0; const weekly = new Float64Array(weeks);
+    for (const [b, u] of units) {
+      const c = by[b], sold = Math.min(realised[b], u), rev = c.price * sold + c.salvage * (u - sold);
+      spent += u * c.cost; soldT += sold; unsoldT += u - sold;
+      const s = parseDate(c.start), e = parseDate(c.end), nights = (e - s) / 864e5 + 1;
+      weekStarts.forEach((ws, k) => {
+        const we = addDays(ws, 6), ov = (Math.min(we, e) - Math.max(ws, s)) / 864e5 + 1;
+        if (ov > 0) weekly[k] += rev * ov / nights;
+      });
+    }
+    let cum = -spent; const series = Array.from(weekly, v => Math.round(cum += v));
+    return { spent: Math.round(spent), final: series[weeks - 1], series, units: [...units.values()].reduce((a, b) => a + b, 0),
+      unsold: Math.round(unsoldT), sell_through: pyRound(soldT / Math.max(1, soldT + unsoldT), 4) };
+  };
+  const labels = { atlas: 'Allotment Atlas', greedy: 'Simple rule', last_year: "Last year's volume" };
+  const score = scorecard(cands, plans, seed);
+  const policies = Object.keys(plans).map(id => ({ id, label: labels[id], ...run(plans[id]), ...score[id] }));
+  const blocks = cands.map(c => ({ id: c.id, label: c.label, forecast: Math.round(c.mu), realised: Math.round(realised[c.id]),
+    surprise: pyRound(realised[c.id] / Math.max(1, c.mu) - 1, 3), atlas_units: plans.atlas.get(c.id) || 0, last_year_units: plans.last_year.get(c.id) || 0 }));
+  return { seed, weeks: weekStarts.map(iso), policies, blocks, market: pyRound(zg, 3) };
+}
+
+function scorecard(cands, plans, seed, n = 2000) {
+  const rng = mulberry32(10000 + seed);
+  const g = GLOBAL_CORRELATION, r = REGION_CORRELATION - GLOBAL_CORRELATION, dd = DEST_CORRELATION, idio = Math.max(0, 1 - g - r - dd);
+  const zg = normals(rng, n), zr = {}, zd = {}, demand = {};
+  for (const c of cands) {
+    zr[c.region] ||= normals(rng, n); zd[c.dest] ||= normals(rng, n);
+    const e = normals(rng, n), d = new Float64Array(n);
+    for (let i = 0; i < n; i++) d[i] = Math.max(0, c.mu + c.sigma * (Math.sqrt(g) * zg[i] + Math.sqrt(r) * zr[c.region][i] + Math.sqrt(dd) * zd[c.dest][i] + Math.sqrt(idio) * e[i]));
+    demand[c.id] = d;
+  }
+  const by = Object.fromEntries(cands.map(c => [c.id, c])), names = Object.keys(plans), totals = {};
+  for (const name of names) {
+    const t = new Float64Array(n);
+    for (const [b, u] of plans[name]) { const c = by[b], d = demand[b]; for (let i = 0; i < n; i++) { const s = Math.min(d[i], u); t[i] += c.price * s + c.salvage * (u - s) - c.cost * u; } }
+    totals[name] = t;
+  }
+  const wins = Object.fromEntries(names.map(k => [k, 0]));
+  for (let i = 0; i < n; i++) { let best = names[0]; for (const k of names) if (totals[k][i] > totals[best][i]) best = k; wins[best]++; }
+  return Object.fromEntries(names.map(k => {
+    const t = totals[k], srt = Float64Array.from(t).sort(); let m = 0; for (const v of t) m += v;
+    return [k, { avg_final: Math.round(m / n), p10_final: Math.round(percentile(srt, 10)), win_rate: pyRound(wins[k] / n, 4) }];
+  }));
+}
+
 // ----------------------------------------------------------------- engine
 export function createLocalEngine(data) {
   const planDate = data.generated_for;
@@ -294,8 +402,14 @@ export function createLocalEngine(data) {
     });
   }
 
+  const req0 = req => ({ budget_lakh: 800, risk_aversion: 0.5, max_share: 0.35, shocks: [], ...req });
+  const sens = req => { const r = req0(req); return sensitivity(candidates(r.shocks), r.budget_lakh, r.risk_aversion, r.max_share); };
+  const rep = (req, seed = 1) => { const r = req0(req); return replay(candidates(r.shocks), planDate, r.budget_lakh, r.risk_aversion, r.max_share, seed); };
+
   return {
     mode: 'browser', planDate,
+    sensitivity: async req => sens(req),
+    replay: async (req, seed) => rep(req, seed),
     destinations: async () => data.destinations,
     forecast: async dest => data.forecasts[dest],
     backtest: async () => data.backtest,
@@ -304,6 +418,6 @@ export function createLocalEngine(data) {
     optimize: async req => optimize(req),
     timing: async (id, shocks = []) => timing(id, shocks),
     frontier: async (budget, shocks = []) => frontier(budget, shocks),
-    _sync: { candidates, optimize, timing, frontier },
+    _sync: { candidates, optimize, timing, frontier, sensitivity: sens, replay: rep },
   };
 }

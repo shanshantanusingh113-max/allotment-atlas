@@ -35,5 +35,13 @@ check('gulf advisory moves money out of Dubai', dxb(shocked) < dxb(js));
 const t0 = Date.now(); engine._sync.optimize({ budget_lakh: 1500, simulations: 10000 });
 check('re-plan under 1.5 s', Date.now() - t0 < 1500, `${Date.now() - t0} ms`);
 
+const ps = data.default_sensitivity, js2 = engine._sync.sensitivity(py.request);
+check('sensitivity: same factor order', ps.factors.map(f => f.id).join() === js2.factors.map(f => f.id).join(), js2.factors.map(f => f.id).join());
+check('sensitivity: swings within 0.5%', ps.factors.every(f => { const j = js2.factors.find(x => x.id === f.id); return Math.abs(j.low_fixed - f.low_fixed) / Math.abs(f.low_fixed) < 5e-3 && Math.abs(j.high_fixed - f.high_fixed) / Math.abs(f.high_fixed) < 5e-3; }));
+const rp = engine._sync.replay(py.request, 3);
+check('replay: three policies over 52 weeks', rp.policies.length === 3 && rp.policies.every(p => p.series.length === 52));
+check('replay: win rates sum to 1', Math.abs(rp.policies.reduce((a, p) => a + p.win_rate, 0) - 1) < 1e-3);
+check('replay: Atlas wins most seasons at ₹8 Cr', rp.policies[0].win_rate === Math.max(...rp.policies.map(p => p.win_rate)), JSON.stringify(rp.policies.map(p => [p.id, p.win_rate])));
+
 if (failures) { console.error(`${failures} check(s) failed`); process.exit(1); }
 console.log('browser engine matches the Python optimiser');

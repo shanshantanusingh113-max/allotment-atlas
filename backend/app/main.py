@@ -118,3 +118,17 @@ def newsvendor_endpoint(body: NewsvendorIn):
         stockout_prob=o.stockout_prob, loss_prob=o.loss_prob,
         curve=newsvendor.profit_curve(body.mu, body.sigma, body.price, body.cost, body.salvage),
     )
+
+
+@app.post("/api/sensitivity", tags=["analysis"])
+def sensitivity(body: OptimizeIn):
+    """Profit swing for each input pushed low and high, with the plan fixed or re-planned."""
+    req = OptimizeRequest(body.budget_lakh, body.risk_aversion, body.max_share, _shocks(body.shocks))
+    return get_engine().sensitivity(req)
+
+
+@app.post("/api/replay", tags=["analysis"])
+def replay(body: OptimizeIn, seed: int = Query(1, ge=1, le=1_000_000)):
+    """Play one simulated season week by week for Atlas, the simple rule and last year's volume."""
+    req = OptimizeRequest(body.budget_lakh, body.risk_aversion, body.max_share, _shocks(body.shocks))
+    return get_engine().replay(req, seed)
