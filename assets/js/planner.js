@@ -13,7 +13,7 @@ const parse = s => new Date(s + 'T00:00:00Z');
 const shortDate = s => { const d = parse(s); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]}`; };
 
 const DEFAULTS = { budget: 800, risk: 0.5, share: 0.35 };
-const state = { ...DEFAULTS, shocks: new Set(), month: 1, block: null, plan: null, seq: 0 };
+const state = { ...DEFAULTS, shocks: new Set(), month: 1, block: null, plan: null, seq: 0, seed: 1 };
 let engine, snap, globe, destByCode = {}, candById = {}, forecastCache = {};
 
 // ------------------------------------------------------------------ boot
@@ -33,7 +33,12 @@ async function boot() {
   $('apiState').textContent = engine.mode === 'api' ? `connected to ${engine.base}` : 'not connected · using the browser engine';
   $('planEyebrow').textContent = `Buy Planner · plan date ${fmtDate(parse(snap.generated_for))}`;
 
-  buildMonths(); buildShocks(); bindControls();
+  const qp = new URLSearchParams(location.search);
+  if (qp.has('budget')) state.budget = Math.max(100, Math.min(1500, Math.round(+qp.get('budget') / 10) * 10)) || DEFAULTS.budget;
+  if (qp.has('risk') && [0, 0.5, 1, 2].includes(+qp.get('risk'))) state.risk = +qp.get('risk');
+  if (qp.has('share')) state.share = Math.max(0.15, Math.min(1, +qp.get('share'))) || DEFAULTS.share;
+  if (qp.get('shocks')) qp.get('shocks').split(',').filter(id => snap.shocks.some(s => s.id === id)).forEach(id => state.shocks.add(id));
+  buildMonths(); buildShocks(); bindControls(); bindAsk(); bindFeatures();
   try { globe = initGlobe($('globe')); } catch (e) { console.error(e); $('globe').innerHTML = '<p class="muted" style="padding:24px">3D view could not start in this browser. Everything else still works.</p>'; }
   setMonth(state.month);
   renderBacktest();
@@ -84,25 +89,26 @@ function buildShocks() {
     $('shocks').appendChild(b);
   }
 }
+function syncControls() {
+  $('budget').value = state.budget; $('share').value = state.share;
+  $('oBudget').textContent = crore(state.budget);
+  $('h1Budget').textContent = `₹${(state.budget / 100).toFixed(state.budget % 100 ? 1 : 0)} Cr`;
+  $('oShare').textContent = `${Math.round(state.share * 100)}%`;
+  $('risk').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', +x.dataset.v === state.risk));
+  $('shocks').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', state.shocks.has(x.dataset.id)));
+}
+function resetState() { Object.assign(state, DEFAULTS); state.shocks.clear(); }
 function bindControls() {
-  const out = () => { $('oBudget').textContent = crore(state.budget); $('h1Budget').textContent = `₹${(state.budget / 100).toFixed(state.budget % 100 ? 1 : 0)} Cr`; $('oShare').textContent = `${Math.round(state.share * 100)}%`; };
-  $('budget').oninput = e => { state.budget = +e.target.value; out(); schedule(); };
-  $('share').oninput = e => { state.share = +e.target.value; out(); schedule(); };
+  $('budget').oninput = e => { state.budget = +e.target.value; syncControls(); schedule(); };
+  $('share').oninput = e => { state.share = +e.target.value; syncControls(); schedule(); };
   $('risk').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
-    $('risk').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
-    state.risk = +b.dataset.v; schedule();
+    state.risk = +b.dataset.v; syncControls(); schedule();
   };
-  $('reset').onclick = () => {
-    Object.assign(state, DEFAULTS); state.shocks.clear();
-    $('budget').value = state.budget; $('share').value = state.share;
-    $('risk').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', +x.dataset.v === state.risk));
-    $('shocks').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', 'false'));
-    out(); schedule();
-  };
-  out();
+  $('reset').onclick = () => { resetState(); syncControls(); schedule(); };
+  syncControls();
 }
-let timer = null, frontierTimer = null;
+let timer = null, frontierTimer = null, analysisTimer = null;
 function schedule() { clearTimeout(timer); timer = setTimeout(replan, engine.mode === 'api' ? 320 : 90); }
 
 // ----------------------------------------------------------------- plan
@@ -127,7 +133,8 @@ async function replan() {
   $('alloc').innerHTML = `<i style="width:${hotel / s.budget * 100}%;background:var(--gold)"></i><i style="width:${flight / s.budget * 100}%;background:var(--blue)"></i>`;
   $('status').textContent = `${engine.mode === 'api' ? 'API' : 'Browser'} · ${plan.picks.length} blocks · ${new Date().toLocaleTimeString()}`;
 
-  renderRows(); renderRisk(); renderSkips();
+  renderRows(); renderRisk(); renderSkips(); renderCalendar(); renderScenarios();
+  clearTimeout(analysisTimer); analysisTimer = setTimeout(runAnalysis, engine.mode === 'api' ? 500 : 250);
   globe?.setPlan(plan);
   if (!state.block || !candById[state.block]) state.block = plan.picks[0]?.id ?? snap.candidates[0].id;
   renderDetail(state.block, false);
@@ -156,6 +163,7 @@ function renderRows() {
 async function renderDetail(id, focus) {
   state.block = id;
   $('rows').querySelectorAll('tr[data-id]').forEach(tr => tr.setAttribute('aria-selected', tr.dataset.id === id));
+  if (state.plan && $('cal').innerHTML) { charts.calendarChart($('cal'), state.plan.picks, candById, snap.generated_for, id); $('cal').querySelectorAll('g[data-id]').forEach(g => { g.onclick = () => renderDetail(g.dataset.id, true); }); }
   const c = candById[id], pick = state.plan.picks.find(p => p.id === id), skip = state.plan.skipped.find(s => s.id === id);
   if (focus) globe?.focus(c.dest);
   globe?.select(c.dest);
@@ -377,6 +385,206 @@ function initGlobe(host) {
 
   setMonthIdx(state.month);
   return { setPlan, setMonth: setMonthIdx, select, focus };
+}
+
+// ------------------------------------------------------------ command bar
+const MONTH_WORDS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+const SHOCK_WORDS = [
+  [/gulf|dubai|advisory/, 'gulf_advisory'], [/vietnam|visa|da ?nang/, 'vietnam_visa'],
+  [/cyclone|storm|typhoon/, 'cyclone'], [/concert|stadium|bangkok/, 'bangkok_concert'], [/fuel|oil|jet/, 'fuel_spike'],
+];
+const toLakh = (n, unit) => /^l/.test(unit) ? n : n * 100;
+const clampBudget = l => Math.max(100, Math.min(1500, Math.round(l / 10) * 10));
+
+export function interpret(text) {
+  const t = ` ${text.toLowerCase().replace(/[,;]+/g, ' , ')} `, said = [], fx = [];
+  if (/\b(reset|start over|defaults?)\b/.test(t)) { fx.push(() => resetState()); said.push('Reset to defaults'); }
+  const amt = '(\\d+(?:\\.\\d+)?)\\s*(cr|crore|crores|l|lakh|lakhs)\\b';
+  const add = t.match(new RegExp(`(?:add|plus|\\+|increase(?: by)?|raise(?: by)?|more)\\s*₹?\\s*${amt}`));
+  const cut = t.match(new RegExp(`(?:cut(?: by)?|minus|reduce(?: by)?|less|lower(?: by)?|remove)\\s*₹?\\s*${amt}`));
+  const set = t.match(new RegExp(`₹?\\s*${amt}`)) || t.match(/budget\s*(?:of|to|=)?\s*₹?\s*(\d+(?:\.\d+)?)\b(?!\s*%)/);
+  if (add) { const d = toLakh(+add[1], add[2]); fx.push(() => { state.budget = clampBudget(state.budget + d); }); said.push(`Budget +${crore(d)}`); }
+  else if (cut) { const d = toLakh(+cut[1], cut[2]); fx.push(() => { state.budget = clampBudget(state.budget - d); }); said.push(`Budget −${crore(d)}`); }
+  else if (set) {
+    const n = +set[1], unit = set[2] || (n <= 15 ? 'cr' : 'l'), l = clampBudget(toLakh(n, unit));
+    fx.push(() => { state.budget = l; }); said.push(`Budget ${crore(l)}`);
+  }
+  const risk = /very (careful|safe|cautious)/.test(t) ? 2 : /\b(careful|cautious|safe|conservative)\b/.test(t) ? 1
+    : /\b(balanced|moderate|normal)\b/.test(t) ? 0.5 : /\b(bold|aggressive|risky|max(imum)? profit)\b/.test(t) ? 0 : null;
+  if (risk !== null) { fx.push(() => { state.risk = risk; }); said.push(`Risk: ${RISK_NAMES[risk]}`); }
+  const cap = t.match(/(\d{1,3})\s*%\s*(?:cap|share|max|per destination)|(?:cap|share|max(?:imum)?)\D{0,20}?(\d{1,3})\s*%/);
+  if (cap) { const v = Math.max(15, Math.min(100, +(cap[1] || cap[2]))) / 100; fx.push(() => { state.share = Math.round(v * 20) / 20; }); said.push(`Cap ${Math.round(v * 100)}% per destination`); }
+  if (/\b(no|clear|remove all|without any) shocks?\b|calm market/.test(t)) { fx.push(() => state.shocks.clear()); said.push('All shocks off'); }
+  else for (const [re, id] of SHOCK_WORDS) {
+    const m = t.match(re); if (!m) continue;
+    const before = t.slice(Math.max(0, m.index - 24), m.index);
+    const off = /\b(no|without|remove|clear|drop|undo|end|lift|cancel)\b[^,]*$/.test(before);
+    const label = snap.shocks.find(s => s.id === id).label;
+    fx.push(() => off ? state.shocks.delete(id) : state.shocks.add(id)); said.push(`${label} ${off ? 'off' : 'on'}`);
+  }
+  const mon = t.match(/\b(?:show|in|month|play)\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/);
+  let monthIdx = null;
+  if (mon) { const mi = MONTH_WORDS.indexOf(mon[1]) + 1; monthIdx = state.months.findIndex(m => +m.split('-')[1] === mi); if (monthIdx >= 0) said.push(`Showing ${MON[mi - 1]}`); else monthIdx = null; }
+  const why = t.match(/\b(?:why|explain|open|show)\s+([a-z][a-z ]+?)(?:\s*[,?.]|\s*$)/);
+  let focusId = null;
+  if (why) {
+    const name = why[1].trim();
+    const c = snap.candidates.find(c => c.dest_name.toLowerCase() === name || c.dest_name.toLowerCase().startsWith(name) || c.label.toLowerCase().includes(name));
+    if (c) { focusId = c.id; said.push(`Opening ${c.dest_name}`); }
+  }
+  return { said, apply: () => fx.forEach(f => f()), monthIdx, focusId };
+}
+
+function bindAsk() {
+  const examples = ['budget 12 crore, bold', 'gulf advisory and fuel spike', 'careful, cap 25%', 'cut 3 crore', 'show July', 'why Makkah', 'reset'];
+  $('askChips').innerHTML = examples.map(e => `<button type="button">${esc(e)}</button>`).join('');
+  $('askChips').onclick = e => { const b = e.target.closest('button'); if (b) { $('ask').value = b.textContent; run(); } };
+  $('askForm').onsubmit = e => { e.preventDefault(); run(); };
+  function run() {
+    const text = $('ask').value.trim(); if (!text) return;
+    const r = interpret(text);
+    if (!r.said.length) {
+      $('askOut').innerHTML = `<span class="no">I didn't catch that.</span> Try "budget 6 crore", "careful", "add Vietnam visa" or "show March".`;
+      return;
+    }
+    r.apply(); syncControls();
+    if (r.monthIdx !== null) setMonth(r.monthIdx);
+    $('askOut').innerHTML = `<b>Done:</b> ${r.said.map(esc).join(' · ')}`;
+    schedule();
+    if (r.focusId) setTimeout(() => { renderDetail(r.focusId, true); $('buys').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); }, 400);
+  }
+}
+
+// ------------------------------------------------ calendar, alerts, CSV
+const daysUntil = iso => Math.round((parse(iso) - parse(snap.generated_for)) / 864e5);
+function renderCalendar() {
+  const picks = state.plan.picks;
+  charts.calendarChart($('cal'), picks, candById, snap.generated_for, state.block);
+  $('cal').querySelectorAll('g[data-id]').forEach(g => { g.onclick = () => { renderDetail(g.dataset.id, true); renderCalendar(); }; });
+  const sorted = picks.slice().sort((a, b) => daysUntil(a.buy_by) - daysUntil(b.buy_by));
+  const now = sorted.filter(p => daysUntil(p.buy_by) <= 7), month = sorted.filter(p => daysUntil(p.buy_by) > 7 && daysUntil(p.buy_by) <= 45);
+  const later = sorted.filter(p => daysUntil(p.buy_by) > 45).slice(0, 3);
+  $('alertCap').textContent = `${now.length} due this week`;
+  const item = (p, cls, tag) => `<button type="button" class="alert ${cls}" data-id="${p.id}"><i>${tag}</i><span><b>${esc(p.label)}</b> · ${p.units.toLocaleString('en-IN')} ${p.kind === 'hotel' ? 'room-nights' : 'seats'}<small>Sign by ${shortDate(p.buy_by)} · ${inr(p.cost)} · stay ${esc(p.window)}</small></span></button>`;
+  $('alerts').innerHTML = [
+    now.length ? now.map(p => item(p, 'now', 'THIS WEEK')).join('') : '<div class="alert" style="cursor:default">Nothing due this week.</div>',
+    ...month.map(p => item(p, 'soon', `IN ${daysUntil(p.buy_by)}D`)),
+    ...later.map(p => item(p, '', shortDate(p.buy_by).toUpperCase())),
+  ].join('');
+  $('alerts').querySelectorAll('button[data-id]').forEach(b => { b.onclick = () => { renderDetail(b.dataset.id, true); $('buys').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); }; });
+}
+
+function downloadCSV() {
+  const cols = ['id', 'label', 'destination', 'kind', 'stay_window', 'units', 'cost_inr', 'expected_profit_inr', 'sell_price_inr', 'buy_by', 'explanation'];
+  const q = v => `"${String(v).replace(/"/g, '""')}"`;
+  const rows = state.plan.picks.map(p => [p.id, p.label, p.dest_name, p.kind, p.window, p.units, p.cost, p.expected_profit, p.sell_price, p.buy_by, p.explanation].map(q).join(','));
+  const blob = new Blob([[cols.join(','), ...rows].join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `atlas-plan-${state.budget}L-${RISK_NAMES[state.risk].toLowerCase().replace(' ', '-')}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  $('csvNote').textContent = `${rows.length} rows exported`;
+}
+
+// --------------------------------------------- sensitivity and replay
+async function runAnalysis() {
+  const req = { budget_lakh: state.budget, risk_aversion: state.risk, max_share: state.share, shocks: [...state.shocks] };
+  const seq = state.seq;
+  try {
+    const sens = await engine.sensitivity(req);
+    if (seq !== state.seq) return;
+    charts.tornadoChart($('tornado'), sens);
+    const top = sens.factors[0], least = sens.factors[sens.factors.length - 1];
+    $('tornadoNote').textContent = `${top.label} is the biggest lever: moving it from ${top.low_label} to ${top.high_label} swings profit by ${inr(top.swing)}. ${least.label} barely matters (${inr(least.swing)}), because the plan already holds a buffer against it.`;
+  } catch (e) { console.error(e); }
+  await runReplay(req, seq);
+}
+let raceFrame = null;
+async function runReplay(req, seq = state.seq) {
+  req ||= { budget_lakh: state.budget, risk_aversion: state.risk, max_share: state.share, shocks: [...state.shocks] };
+  $('raceStatus').textContent = 'Simulating…';
+  let rep;
+  try { rep = await engine.replay(req, state.seed); } catch (e) { $('raceStatus').textContent = 'Replay failed.'; console.error(e); return; }
+  if (seq !== state.seq) return;
+  const ranked = rep.policies.slice().sort((a, b) => b.final - a.final), atlas = rep.policies.find(p => p.id === 'atlas');
+  const place = ['first', 'second', 'third'][ranked.findIndex(p => p.id === 'atlas')];
+  $('raceTitle').textContent = `Season #${rep.seed}`;
+  $('raceSub').textContent = `${rep.market >= 0 ? 'Strong' : 'Soft'} travel market · Atlas finished ${place}`;
+  $('raceStatus').textContent = `Atlas sold ${(atlas.sell_through * 100).toFixed(1)}% of what it bought`;
+  cancelAnimationFrame(raceFrame);
+  const t0 = performance.now(), dur = reduce ? 0 : 2600;
+  const step = now => { const p = dur ? Math.min(1, (now - t0) / dur) : 1; charts.raceChart($('race'), rep, p); if (p < 1) raceFrame = requestAnimationFrame(step); };
+  raceFrame = requestAnimationFrame(step);
+  const colors = { atlas: 'var(--gold)', greedy: 'var(--blue)', last_year: 'var(--violet)' };
+  $('score').innerHTML = rep.policies.map(p => `<div><i style="--c:${colors[p.id]}"></i><span><b>${esc(p.label)}</b><small>average ${inr(p.avg_final)} · bad season ${inr(p.p10_final)}</small></span><strong>${Math.round(p.win_rate * 100)}%</strong></div>`).join('')
+    + `<p class="muted" style="font-size:.82rem;margin:0">${scoreNote(rep.policies)}</p>`;
+  const surprises = rep.blocks.filter(b => b.atlas_units > 0).sort((a, b) => Math.abs(b.surprise) - Math.abs(a.surprise)).slice(0, 4);
+  $('surprises').innerHTML = surprises.map(b => `<div><span>${esc(b.label)}</span><span class="${b.surprise >= 0 ? 'up' : 'down'}">${b.surprise >= 0 ? '+' : '−'}${Math.abs(Math.round(b.surprise * 100))}% vs forecast</span></div>`).join('');
+}
+function scoreNote(ps) {
+  const a = ps.find(p => p.id === 'atlas'), others = ps.filter(p => p.id !== 'atlas');
+  const bestAvg = others.reduce((m, p) => p.avg_final > m.avg_final ? p : m, others[0]);
+  const topWin = ps.reduce((m, p) => p.win_rate > m.win_rate ? p : m, ps[0]);
+  if (a.avg_final >= bestAvg.avg_final) return `Percentages are how often each plan finishes first. Atlas earns the most on average and ${a.p10_final >= Math.max(...others.map(p => p.p10_final)) ? 'has the best bad season too' : 'stays competitive in bad seasons'}${topWin.id !== 'atlas' ? `; ${topWin.label.toLowerCase()} wins more often, but only by small margins in lucky seasons` : ''}.`;
+  return `At this budget ${bestAvg.label.toLowerCase()} earns ${inr(bestAvg.avg_final - a.avg_final)} more on average, but Atlas ${a.p10_final >= bestAvg.p10_final ? 'protects the bad season better' : 'is set to trade profit for safety'}. Choose Bold to chase the average.`;
+}
+
+// ----------------------------------------------------------- scenarios
+const SKEY = 'atlas.scenarios';
+let memScenarios = [];
+const loadScenarios = () => { try { return JSON.parse(localStorage.getItem(SKEY) || '[]'); } catch (_) { return memScenarios; } };
+const storeScenarios = list => { memScenarios = list; try { localStorage.setItem(SKEY, JSON.stringify(list)); } catch (_) { /* private mode */ } };
+function snapshotScenario(name) {
+  const p = state.plan;
+  return { id: Date.now().toString(36), name, req: { budget: state.budget, risk: state.risk, share: state.share, shocks: [...state.shocks] },
+    s: { spent: p.summary.spent, profit: p.summary.expected_profit, roi: p.summary.roi, blocks: p.summary.blocks, uplift: p.summary.uplift_vs_greedy },
+    r: { p10: p.risk.p10, cvar5: p.risk.cvar5, loss: p.risk.prob_loss }, units: Object.fromEntries(p.picks.map(x => [x.id, x.units])) };
+}
+function renderScenarios() {
+  const list = loadScenarios(), cur = snapshotScenario('Current');
+  const cols = [cur, ...list];
+  if (!list.length) {
+    $('scnBox').innerHTML = `<div class="empty-box">No saved scenarios yet. Press <b>Save scenario</b> under the controls, change something (try a shock or a new budget), and the comparison appears here.</div>`;
+    return;
+  }
+  const shockNames = ids => ids.length ? ids.map(id => snap.shocks.find(s => s.id === id)?.label.split(' ')[0]).join(', ') : 'none';
+  const best = (vals, hi = true) => { const m = hi ? Math.max(...vals) : Math.min(...vals); return vals.map(v => v === m); };
+  const row = (label, f, fmt, hi) => { const v = cols.map(f), b = hi === undefined ? v.map(() => false) : best(v, hi);
+    return `<tr><th>${label}</th>${v.map((x, i) => `<td class="r num ${i === 0 ? 'cur' : ''} ${b[i] ? 'best' : ''}">${fmt(x)}</td>`).join('')}</tr>`; };
+  const diff = sc => { const a = Object.keys(cur.units).filter(k => !(k in sc.units)).length, d = Object.keys(sc.units).filter(k => !(k in cur.units)).length;
+    let ch = 0; for (const k in cur.units) if (k in sc.units && sc.units[k] !== cur.units[k]) ch++; return a + d + ch ? `${a} added · ${d} dropped · ${ch} resized` : 'same blocks'; };
+  $('scnBox').innerHTML = `<table><thead><tr><th></th>${cols.map((c, i) => `<th class="r ${i === 0 ? 'cur' : ''}">${esc(c.name)}${i ? `<br><button class="mini" data-load="${c.id}">Load</button><button class="mini del" data-del="${c.id}">Delete</button>` : ''}</th>`).join('')}</tr></thead><tbody>
+    ${row('Budget', c => c.req.budget, v => crore(v))}
+    ${row('Risk appetite', c => RISK_NAMES[c.req.risk], v => v)}
+    ${row('Shocks', c => shockNames(c.req.shocks), v => esc(v))}
+    ${row('Blocks', c => c.s.blocks, v => v)}
+    ${row('Spend', c => c.s.spent, inr)}
+    ${row('Expected profit', c => c.s.profit, inr, true)}
+    ${row('Return on spend', c => c.s.roi, v => `${(v * 100).toFixed(1)}%`, true)}
+    ${row('Bad season (P10)', c => c.r.p10, inr, true)}
+    ${row('Worst 5% average', c => c.r.cvar5, inr, true)}
+    ${row('Chance of a loss', c => c.r.loss, v => `${(v * 100).toFixed(1)}%`, false)}
+    <tr><th>Versus current</th>${cols.map((c, i) => `<td class="r ${i === 0 ? 'cur' : ''}">${i ? diff(c) : '–'}</td>`).join('')}</tr>
+  </tbody></table>`;
+  $('scnBox').querySelectorAll('[data-load]').forEach(b => { b.onclick = () => {
+    const sc = list.find(x => x.id === b.dataset.load); if (!sc) return;
+    Object.assign(state, { budget: sc.req.budget, risk: sc.req.risk, share: sc.req.share }); state.shocks = new Set(sc.req.shocks);
+    syncControls(); schedule(); }; });
+  $('scnBox').querySelectorAll('[data-del]').forEach(b => { b.onclick = () => { storeScenarios(list.filter(x => x.id !== b.dataset.del)); renderScenarios(); }; });
+}
+function saveScenario() {
+  const list = loadScenarios();
+  const letter = 'ABCDEFGH'[list.length % 8];
+  const tag = [crore(state.budget), RISK_NAMES[state.risk], ...[...state.shocks].map(id => snap.shocks.find(s => s.id === id).label.split(' ')[0])].join(' · ');
+  list.push(snapshotScenario(`${letter}: ${tag}`));
+  while (list.length > 4) list.shift();
+  storeScenarios(list); renderScenarios();
+  $('status').textContent = `Saved scenario ${letter}. Change something to compare.`;
+}
+
+function bindFeatures() {
+  $('csv').onclick = downloadCSV;
+  $('saveScn').onclick = saveScenario;
+  $('replayBtn').onclick = () => { state.seed += 1; runReplay(); };
 }
 
 boot();

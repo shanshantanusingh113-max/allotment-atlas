@@ -18,9 +18,12 @@
   <div class="wrap">
     <a class="brand" href="index.html">Atlas</a>
     <div class="pages">
-      <a href="index.html">3D Lab</a>
+      <a href="lab.html">3D Lab</a>
       <a href="planner.html" aria-current="page">Buy Planner</a>
       <a href="walkthrough.html">Walkthrough</a>
+      <a href="#calendar">Calendar</a>
+      <a href="#replay">Replay</a>
+      <a href="#scenarios">Scenarios</a>
       <a href="#model">Model</a>
     </div>
     <button class="engine" id="engine" type="button" data-mode="loading" title="Which engine is answering"><i></i><b id="engineTxt">Connecting</b></button>
@@ -54,6 +57,12 @@
   </div>
 
   <div class="card controls" aria-label="Plan controls">
+    <form class="ask" id="askForm" autocomplete="off">
+      <label for="ask" class="ask-label">Ask the planner</label>
+      <div class="ask-row"><input id="ask" type="text" placeholder="e.g. budget 12 crore, careful, gulf advisory"><button class="btn dark" type="submit">Go</button></div>
+      <div class="ask-chips" id="askChips"></div>
+      <div class="ask-out" id="askOut" aria-live="polite"></div>
+    </form>
     <label for="budget"><span>Budget <output id="oBudget">₹8.00 Cr</output></span><input id="budget" type="range" min="100" max="1500" step="10" value="800"></label>
     <div style="display:grid;gap:6px;font-size:.88rem;font-weight:500">Risk appetite
       <div class="seg" id="risk" role="group" aria-label="Risk appetite">
@@ -71,7 +80,7 @@
       <div class="alloc" id="alloc" aria-label="Spend split"></div>
       <div class="key" style="margin-top:6px"><span style="--c:var(--gold)">Hotels</span><span style="--c:var(--blue)">Flights</span><span style="--c:var(--panel2)">Unspent</span></div>
     </div>
-    <div class="row"><button class="btn" type="button" id="reset">Reset</button><span class="status" id="status" aria-live="polite"></span></div>
+    <div class="row"><button class="btn" type="button" id="reset">Reset</button><button class="btn" type="button" id="saveScn">Save scenario</button><span class="status" id="status" aria-live="polite"></span></div>
   </div>
 </section>
 
@@ -80,6 +89,7 @@
     <div class="eyebrow">01 · Buy list</div>
     <h2>What to buy, how much, and when</h2>
     <p>Sorted by expected profit. Select a row to see why the engine chose it, the demand forecast behind it, and the best day to sign the contract.</p>
+    <div class="row"><button class="btn" type="button" id="csv">Download buy list (CSV)</button><span class="status" id="csvNote"></span></div>
   </div>
   <div class="split">
     <div class="tbl"><table>
@@ -90,9 +100,24 @@
   </div>
 </section>
 
+<section class="wrap sec t-violet" id="calendar">
+  <div class="sec-head">
+    <div class="eyebrow">02 · Buy calendar</div>
+    <h2>When each contract gets signed</h2>
+    <p>Diamonds mark the best day to buy; bars are the stay windows. Red diamonds are due within a week. Select a row to open it above.</p>
+  </div>
+  <div class="split">
+    <div class="card"><svg class="chart" id="cal" viewBox="0 0 560 400" role="img" aria-label="Buy dates and stay windows"></svg></div>
+    <div class="card" style="display:grid;gap:12px;align-content:start">
+      <div class="cap"><b>Alerts</b><span id="alertCap"></span></div>
+      <div class="alerts" id="alerts"></div>
+    </div>
+  </div>
+</section>
+
 <section class="wrap sec t-coral" id="risk-sec">
   <div class="sec-head">
-    <div class="eyebrow">02 · Risk</div>
+    <div class="eyebrow">03 · Risk</div>
     <h2>Ten thousand seasons, one plan</h2>
     <p>Demand is drawn with shared shocks, so blocks in the same destination and region rise and fall together. The spread is the risk; the frontier shows what each risk setting buys.</p>
   </div>
@@ -113,9 +138,48 @@
   </div>
 </section>
 
+<section class="wrap sec t-green" id="sensitivity">
+  <div class="sec-head">
+    <div class="eyebrow">04 · What moves profit</div>
+    <h2>Which assumptions matter most</h2>
+    <p>Each input is pushed down and up while the plan stays fixed. Long bars are the numbers worth negotiating or watching; short bars are risks the plan already absorbs.</p>
+  </div>
+  <div class="card"><svg class="chart" id="tornado" viewBox="0 0 900 280" role="img" aria-label="Profit change for each input"></svg><p class="muted" id="tornadoNote" style="font-size:.86rem;margin-top:8px"></p></div>
+</section>
+
+<section class="wrap sec t-gold" id="replay">
+  <div class="sec-head">
+    <div class="eyebrow">05 · Season replay</div>
+    <h2>Play the season forward</h2>
+    <p>One simulated year unfolds week by week. Cash goes out today and comes back as guests stay. Atlas races two common alternatives: the simple ratio rule, and buying last year's volume.</p>
+  </div>
+  <div class="split">
+    <div class="card">
+      <div class="cap"><b id="raceTitle">Season #1</b><span id="raceSub"></span></div>
+      <svg class="chart" id="race" viewBox="0 0 560 280" role="img" aria-label="Cumulative cash by policy across the season"></svg>
+      <div class="row" style="margin-top:8px"><button class="btn dark" type="button" id="replayBtn">Replay another season</button><span class="status" id="raceStatus"></span></div>
+    </div>
+    <div class="card" style="display:grid;gap:12px;align-content:start">
+      <div class="cap"><b>Over 2,000 seasons</b><span>same plans, different luck</span></div>
+      <div class="score" id="score"></div>
+      <div class="cap"><b>Biggest surprises this season</b></div>
+      <div class="surprises" id="surprises"></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap sec t-blue" id="scenarios">
+  <div class="sec-head">
+    <div class="eyebrow">06 · Scenarios</div>
+    <h2>Compare plans side by side</h2>
+    <p>Save the current settings as a scenario, change anything, and compare. Scenarios stay in this browser.</p>
+  </div>
+  <div class="tbl" id="scnBox"></div>
+</section>
+
 <section class="wrap sec t-blue" id="model">
   <div class="sec-head">
-    <div class="eyebrow">03 · Model</div>
+    <div class="eyebrow">07 · Model</div>
     <h2>Why you can trust the forecast</h2>
     <p>The forecaster was tested walk-forward: trained on 18 months of synthetic history, scored on the next 26 weeks it never saw.</p>
   </div>

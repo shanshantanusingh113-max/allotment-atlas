@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Allotment Atlas 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/lab.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+<nav class="nav" aria-label="Simulations">
+  <div class="wrap">
+    <a href="index.html" style="text-decoration:none"><b>Atlas 3D</b></a>
+    <a href="#season">Season</a><a href="#swarm">Swarm</a><a href="#surface">Forecast</a><a href="#landscape">Profit</a><a href="#city">Portfolio</a><a href="planner.html" style="color:var(--ink);font-weight:600">Buy Planner →</a><a href="walkthrough.html">Walkthrough</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">TBO Hackathon · Inventory Optimization · Simulation lab</div>
+      <h1>Allotment <span>Atlas 3D</span></h1>
+      <p>Five live simulations of how TBO could pre-buy hotel rooms and flight seats: watch a season unfold, see demand leak, read the forecast surface, size the bet, and spend the budget.</p>
+      <div class="cta"><a class="btn go" href="#season">Start simulating</a><a class="btn gold" href="planner.html">Open the Buy Planner</a></div>
+      <div class="hero-stats">
+        <div><b class="mono">16</b><small>Destinations</small></div>
+        <div><b class="mono">3</b><small>Indian hubs</small></div>
+        <div><b class="mono">5</b><small>Simulations</small></div>
+        <div><b class="mono">5k</b><small>Seasons per run</small></div>
+      </div>
+    </div>
+    <div class="globe-card">
+      <div id="globe" aria-label="3D globe of TBO routes from Indian hubs to key destinations"></div>
+      <div class="drag">Drag to spin</div>
+      <div class="globe-legend"><span style="--c:var(--ink)">Hub</span><span style="--c:var(--gold)">Destination</span><span style="--c:#E08A00">Booking in flight</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="band" aria-label="How the five simulations connect">
+  <div class="wrap">
+    <div class="step"><b style="--c:#F2A922">1 · Feel it</b><span>One hotel, one season, real trade-offs</span></div>
+    <div class="step"><b style="--c:#7FA0F5">2 · See the leak</b><span>Demand that hits sold-out</span></div>
+    <div class="step"><b style="--c:#46C08A">3 · Forecast</b><span>Fill in what isn't booked yet</span></div>
+    <div class="step"><b style="--c:#FF8A65">4 · Size the bet</b><span>Profit, risk and the best block</span></div>
+    <div class="step"><b style="--c:#B98AF0">5 · Spend it</b><span>One budget across sixteen bets</span></div>
+  </div>
+</div>
+
+<main>
+<div class="wrap index">
+  <a class="t1" href="#season"><i>SIM 01</i><b>Season in a hotel</b><span>90 days of bookings, sell-outs and cancellations in one tower</span></a>
+  <a class="t2" href="#swarm"><i>SIM 02</i><b>Agency swarm</b><span>Thousands of searches chasing limited stock</span></a>
+  <a class="t3" href="#surface"><i>SIM 03</i><b>Forecast surface</b><span>Bookings on hand by stay date and days before arrival</span></a>
+  <a class="t4" href="#landscape"><i>SIM 04</i><b>Profit landscape</b><span>Expected profit across every buy size, plus Monte Carlo</span></a>
+  <a class="t5" href="#city"><i>SIM 05</i><b>Portfolio city</b><span>Sixteen bets compete for one budget under market shocks</span></a>
+</div>
+
+<!-- SIM 1 -->
+<section class="bay wrap t1" id="season">
+  <div class="bay-head">
+    <div class="eyebrow">Simulation 01 · Season in a hotel</div>
+    <h2>Ninety days in one tower</h2>
+    <p>A 240-room Goa hotel for New Year's Eve. Gold rooms are the block TBO pre-bought. Grey rooms go to other channels. When the hotel fills, TBO's agencies hit "sold out" and the searches spark red. Press play.</p>
+  </div>
+  <div class="lab">
+    <div class="vp" id="towerVp">
+      <div class="hud">
+        <div><small>Days to check-in</small><b id="tDay">90</b></div>
+        <div><small>TBO sold</small><b id="tSold">0</b></div>
+        <div><small>Lost searches</small><b id="tLost" style="color:var(--red)">0</b></div>
+        <div><small>Profit</small><b id="tProfit">₹0</b></div>
+      </div>
+      <div class="hud-bottom">
+        <span style="--c:#F6DDA5">TBO block, unsold</span><span style="--c:var(--gold)">TBO sold</span><span style="--c:var(--sky)">TBO free-sale</span><span style="--c:#9FAAC0">Other channels</span><span style="--c:var(--red)">Wasted</span>
+      </div>
+    </div>
+    <div class="console">
+      <label for="tQ"><span>Rooms TBO pre-buys <output id="oQ"></output></span><input id="tQ" type="range" min="0" max="120" step="2" value="60"></label>
+      <div style="display:grid;gap:6px;font-size:.88rem">Season demand
+        <div class="seg" id="tDem" role="group" aria-label="Season demand">
+          <button type="button" data-v="low" aria-pressed="false">Quiet</button>
+          <button type="button" data-v="normal" aria-pressed="true">Normal</button>
+          <button type="button" data-v="festival" aria-pressed="false">Festival rush</button>
+        </div>
+      </div>
+      <label for="tCx"><span>Cancellation rate <output id="oCx"></output></span><input id="tCx" type="range" min="0" max="40" step="2" value="12"></label>
+      <label for="tSp"><span>Speed <output id="oSp"></output></span><input id="tSp" type="range" min="1" max="5" step="1" value="2"></label>
+      <div class="row-btn">
+        <button class="btn go" type="button" id="tPlay">Play season</button>
+        <button class="btn" type="button" id="tReset">Reset</button>
+        <button class="btn" type="button" id="tAuto">Size with forecast</button>
+      </div>
+      <canvas class="spark" id="tSpark" aria-label="Cumulative bookings and lost searches"></canvas>
+      <div class="log" id="tLog" aria-live="polite"></div>
+    </div>
+  </div>
+  <div class="try">
+    <div><b>Try this</b>Set pre-buy to 0 and choose Festival rush. Watch the free-sale rooms vanish and the red sparks start.</div>
+    <div><b>Then this</b>Max out the block on a Quiet season. The leftover gold turns red at check-in: that is unsold-inventory risk.</div>
+    <div><b>Finally</b>Press "Size with forecast". The newsvendor rule picks a block that balances both risks.</div>
+  </div>
+</section>
+
+<!-- SIM 2 -->
+<section class="bay wrap t2" id="swarm">
+  <div class="bay-head">
+    <div class="eyebrow">Simulation 02 · Agency swarm</div>
+    <h2>Searches chasing stock</h2>
+    <p>Each dot is an agency search flying from a city to a destination. If TBO has a room, it books in gold. If not, it bounces back red. Each day the stock resets, and anything left unsold is wasted. Find the balance.</p>
+  </div>
+  <div class="lab">
+    <div class="vp" id="swarmVp">
+      <canvas id="swarmCv" aria-label="Agency search swarm simulation"></canvas>
+      <div class="hud">
+        <div><small>Day</small><b id="sDay">1</b></div>
+        <div><small>Look-to-book</small><b id="sLtb">0%</b></div>
+        <div><small>Lost</small><b id="sLost" style="color:var(--red)">0</b></div>
+        <div><small>Wasted rooms</small><b id="sWaste" style="color:var(--violet)">0</b></div>
+      </div>
+    </div>
+    <div class="console">
+      <label for="sPre"><span>Pre-bought rooms per destination per day <output id="oPre"></output></span><input id="sPre" type="range" min="0" max="24" step="1" value="8"></label>
+      <label for="sDemand"><span>Search volume <output id="oDemand"></output></span><input id="sDemand" type="range" min="1" max="10" step="1" value="5"></label>
+      <div class="toggles">
+        <button class="tog" type="button" id="sFest" aria-pressed="false" style="--c:var(--gold)">Festival week: Goa demand ×2.5</button>
+        <button class="tog" type="button" id="sSmart" aria-pressed="false" style="--c:var(--green)">Smart allocation: stock follows the forecast</button>
+      </div>
+      <div class="stats">
+        <div><b id="sBooked">0</b><small>bookings</small></div>
+        <div><b id="sSearch">0</b><small>searches</small></div>
+        <div><b id="sProfit">₹0</b><small>profit (₹2,500 per booking, −₹4,500 per wasted room)</small></div>
+        <div><b id="sFill">0%</b><small>sell-through</small></div>
+      </div>
+      <div class="row-btn"><button class="btn" type="button" id="sReset">Reset counters</button></div>
+    </div>
+  </div>
+  <div class="try">
+    <div><b>Try this</b>Drop pre-bought rooms to 2. Look-to-book collapses and red bounces dominate.</div>
+    <div><b>Then this</b>Push it to 24. Few searches are lost, but violet waste piles up and profit falls.</div>
+    <div><b>Finally</b>Turn on Festival week, then Smart allocation. Same total stock, placed where the forecast says.</div>
+  </div>
+</section>
+
+<!-- SIM 3 -->
+<section class="bay wrap t3" id="surface">
+  <div class="bay-head">
+    <div class="eyebrow">Simulation 03 · Forecast surface</div>
+    <h2>The demand time surface</h2>
+    <p>Every ridge is one stay date, from 1 December to 29 January. Height is rooms booked so far; depth is days before arrival. Gold is already on the books today. Blue is what the forecaster must predict. Move "today" and watch the known region grow.</p>
+  </div>
+  <div class="lab">
+    <div class="vp" id="surfVp">
+      <div class="hud">
+        <div><small>Today</small><b id="fToday">–</b></div>
+        <div><small>Stay date</small><b id="fStay">–</b></div>
+        <div><small>On the books</small><b id="fOn">–</b></div>
+        <div><small>Forecast final</small><b id="fFin" style="color:var(--sky)">–</b></div>
+      </div>
+      <div class="hud-bottom"><span style="--c:var(--gold)">Known bookings</span><span style="--c:var(--sky)">Still to forecast</span><span style="--c:var(--ink)">Selected stay date</span></div>
+    </div>
+    <div class="console">
+      <label for="fT"><span>Today <output id="oT"></output></span><input id="fT" type="range" min="-60" max="59" step="1" value="-20"></label>
+      <label for="fS"><span>Stay date to inspect <output id="oS"></output></span><input id="fS" type="range" min="0" max="59" step="1" value="30"></label>
+      <div style="display:grid;gap:6px;font-size:.88rem">Booking behaviour
+        <div class="seg" id="fSeg" role="group" aria-label="Segment">
+          <button type="button" data-v="10" aria-pressed="false">Corporate (late)</button>
+          <button type="button" data-v="20" aria-pressed="true">Leisure</button>
+          <button type="button" data-v="42" aria-pressed="false">Religious (early)</button>
+        </div>
+      </div>
+      <div class="toggles"><button class="tog" type="button" id="fShock" aria-pressed="false" style="--c:var(--red)">Stadium concert announced for 14 Dec</button></div>
+      <div class="row-btn"><button class="btn go" type="button" id="fPlay">Animate today</button></div>
+      <p class="note">This is the "report date × stay date" view from hotel revenue research. Pace reports and pickup curves are just slices of it. The forecaster's job is to fill in the blue.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SIM 4 -->
+<section class="bay wrap t4" id="landscape">
+  <div class="bay-head">
+    <div class="eyebrow">Simulation 04 · Profit landscape</div>
+    <h2>The shape of a good bet</h2>
+    <p>Expected profit for every block size (left to right) and every level of forecast uncertainty (front to back), for demand averaging 110 rooms. Gold peaks are profitable; red valleys lose money. The dark ridge is the best buy size at each uncertainty. Change the prices and the terrain reshapes.</p>
+  </div>
+  <div class="lab">
+    <div class="vp" id="landVp">
+      <div class="hud">
+        <div><small>Your block</small><b id="lQv">–</b></div>
+        <div><small>Expected profit</small><b id="lE">–</b></div>
+        <div><small>Best block</small><b id="lQs" style="color:var(--green)">–</b></div>
+        <div><small>Left on table</small><b id="lGap" style="color:var(--red)">–</b></div>
+      </div>
+    </div>
+    <div class="console">
+      <label for="lP"><span>Selling price <output id="oLP"></output></span><input id="lP" type="range" min="6000" max="14000" step="250" value="9000"></label>
+      <label for="lC"><span>Pre-buy cost <output id="oLC"></output></span><input id="lC" type="range" min="3000" max="10000" step="250" value="6000"></label>
+      <label for="lS"><span>Recovery if unsold <output id="oLS"></output></span><input id="lS" type="range" min="0" max="4000" step="250" value="1500"></label>
+      <hr style="border:0;border-top:1px solid var(--line);margin:0">
+      <label for="lQ"><span>Your block size <output id="oLQ"></output></span><input id="lQ" type="range" min="0" max="220" step="2" value="150"></label>
+      <label for="lSig"><span>Forecast uncertainty σ <output id="oLSig"></output></span><input id="lSig" type="range" min="5" max="60" step="1" value="30"></label>
+      <button class="btn" type="button" id="lSnap">Snap to the ridge</button>
+    </div>
+  </div>
+  <div class="mc">
+    <div class="console" style="padding:14px">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <div class="eyebrow">Monte Carlo · 5,000 simulated seasons</div>
+        <button class="btn gold" type="button" id="mcRun">Run simulation</button>
+      </div>
+      <canvas class="hist" id="mcHist" aria-label="Profit distribution histogram"></canvas>
+      <div class="hud-bottom" style="position:static;padding:0"><span style="--c:var(--gold)">Your block</span><span style="--c:var(--sky)">Best block</span><span style="--c:var(--red)">Loss zone</span></div>
+    </div>
+    <div class="console">
+      <div class="stats" id="mcStats">
+        <div><b id="mcM1">–</b><small>your average profit</small></div>
+        <div><b id="mcM2" style="color:var(--sky)">–</b><small>best block average</small></div>
+        <div><b id="mcP1">–</b><small>your bad season (P10)</small></div>
+        <div><b id="mcP2" style="color:var(--sky)">–</b><small>best block P10</small></div>
+        <div><b id="mcL1" style="color:var(--red)">–</b><small>your chance of a loss</small></div>
+        <div><b id="mcL2" style="color:var(--sky)">–</b><small>best block chance of loss</small></div>
+      </div>
+      <p class="note">Each run draws random demand from the forecast and plays out the season. The spread is the risk; the gap between the two shapes is the value of the optimizer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SIM 5 -->
+<section class="bay wrap t5" id="city">
+  <div class="bay-head">
+    <div class="eyebrow">Simulation 05 · Portfolio city</div>
+    <h2>Sixteen bets, one budget</h2>
+    <p>Each tower is a candidate block. Its footprint is the cost and its height is expected profit. Lit towers are what the optimizer buys. Change the budget, set your risk appetite, then hit the market with shocks and watch the city rebuild.</p>
+  </div>
+  <div class="lab">
+    <div class="vp" id="cityVp">
+      <div class="hud">
+        <div><small>Spent</small><b id="cSpend">–</b></div>
+        <div><small>Expected profit</small><b id="cExp" style="color:var(--gold)">–</b></div>
+        <div><small>Bad season P10</small><b id="cP10">–</b></div>
+        <div><small>Blocks bought</small><b id="cN">–</b></div>
+      </div>
+    </div>
+    <div class="console">
+      <label for="cBud"><span>Budget <output id="oCB"></output></span><input id="cBud" type="range" min="100" max="900" step="10" value="500"></label>
+      <div style="display:grid;gap:6px;font-size:.88rem">Risk appetite
+        <div class="seg" id="cRisk" role="group" aria-label="Risk appetite">
+          <button type="button" data-v="1" aria-pressed="false">Cautious</button>
+          <button type="button" data-v=".5" aria-pressed="true">Balanced</button>
+          <button type="button" data-v=".1" aria-pressed="false">Aggressive</button>
+        </div>
+      </div>
+      <div class="toggles" id="cShocks">
+        <button class="tog" type="button" data-k="dubai" aria-pressed="false" style="--c:var(--red)">Gulf travel advisory: Dubai −35%</button>
+        <button class="tog" type="button" data-k="vietnam" aria-pressed="false" style="--c:var(--green)">Vietnam visa-free for Indians: +60%</button>
+        <button class="tog" type="button" data-k="cyclone" aria-pressed="false" style="--c:var(--red)">Cyclone warning: Phuket and Bali</button>
+        <button class="tog" type="button" data-k="concert" aria-pressed="false" style="--c:var(--green)">Stadium concert in Bangkok: +35%</button>
+        <button class="tog" type="button" data-k="fuel" aria-pressed="false" style="--c:var(--red)">Jet fuel spike: flight margins cut</button>
+      </div>
+      <div class="log" id="cLog" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="solid"><div class="wrap inner">
+  <div class="eyebrow">About this lab</div>
+  <p>All data is synthetic and every model is simplified for clarity: normal demand, Poisson arrivals, a greedy optimizer in place of the integer solver the real build would use. The full plan, glossary, idea matrix and team board live in the <a href="walkthrough.html">Allotment Atlas walkthrough</a>, and the full decision engine in the <a href="planner.html">Buy Planner</a>.</p>
+</div></footer>
+
+<script src="assets/js/lab.js"></script>
+</body>
+</html>

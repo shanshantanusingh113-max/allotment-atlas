@@ -175,3 +175,40 @@ footer a{color:#9DB6F7}
 footer .eyebrow{color:var(--gold)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 @media (max-width:560px){.g-hint{display:none}}
+
+/* command bar */
+.ask{display:grid;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.ask-label{font:600 .7rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.ask-row{display:flex;gap:6px}
+.ask-row input{flex:1;min-width:0;font:400 .95rem var(--f-body);color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.ask-row input:focus{outline:2px solid var(--gold);outline-offset:1px;background:var(--panel)}
+.ask-chips{display:flex;gap:6px;flex-wrap:wrap}
+.ask-chips button{border:1px dashed var(--line2);background:transparent;color:var(--muted);border-radius:999px;padding:4px 10px;font:500 .74rem var(--f-body);cursor:pointer}
+.ask-chips button:hover{border-style:solid;color:var(--ink)}
+.ask-out{font-size:.82rem;color:var(--muted);min-height:0}
+.ask-out b{color:var(--green)}
+.ask-out .no{color:var(--coral)}
+/* alerts, score, surprises */
+.alerts{display:grid;gap:8px}
+.alert{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:.86rem;cursor:pointer;border:0;text-align:left;color:var(--ink);width:100%}
+.alert i{font-style:normal;font:700 .66rem var(--f-mono);padding:4px 7px;border-radius:5px;color:#fff;background:var(--ink);white-space:nowrap}
+.alert.now i{background:var(--coral)}.alert.soon i{background:var(--gold);color:var(--ink)}
+.alert small{display:block;color:var(--muted)}
+.score{display:grid;gap:8px}
+.score div{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--soft)}
+.score i{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.score b{font-weight:600}
+.score small{display:block;color:var(--muted);font-size:.78rem}
+.score strong{font:800 1.4rem/1 var(--f-display);font-variant-numeric:tabular-nums}
+.surprises{display:grid;gap:6px;font-size:.84rem}
+.surprises div{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;background:var(--soft)}
+.up{color:var(--green);font-weight:600}.down{color:var(--coral);font-weight:600}
+/* scenarios */
+#scnBox table{min-width:560px}
+#scnBox td,#scnBox th{white-space:nowrap}
+#scnBox tbody tr{cursor:default}
+#scnBox .cur{background:color-mix(in srgb,var(--gold) 12%,var(--panel))}
+#scnBox .best{color:var(--green);font-weight:700}
+#scnBox .mini{border:0;background:none;color:var(--blue);cursor:pointer;font:600 .76rem var(--f-body);padding:0 6px 0 0}
+#scnBox .mini.del{color:var(--coral)}
+.empty-box{padding:22px;color:var(--muted);font-size:.92rem}

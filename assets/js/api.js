@@ -40,6 +40,8 @@ function remoteEngine(base, health) {
     candidates: (shocks = []) => fetchJSON(`${base}/api/candidates?${qs(shocks)}`),
     optimize: req => fetchJSON(`${base}/api/optimize`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(req) }),
     timing: (id, shocks = []) => fetchJSON(`${base}/api/timing/${id}?${qs(shocks)}`),
+    sensitivity: req => fetchJSON(`${base}/api/sensitivity`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(req) }, 30000),
+    replay: (req, seed = 1) => fetchJSON(`${base}/api/replay?seed=${seed}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(req) }, 30000),
     frontier: (budget, shocks = []) => fetchJSON(`${base}/api/frontier?budget_lakh=${budget}&${qs(shocks)}`, {}, 30000),
   };
 }
