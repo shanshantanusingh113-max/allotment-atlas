@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/css/planner.css">
+<link rel="stylesheet" href="assets/css/transitions.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
@@ -20,6 +21,7 @@
     <div class="pages">
       <a href="lab.html">3D Lab</a>
       <a href="planner.html" aria-current="page">Buy Planner</a>
+      <a href="data.html">Data</a>
       <a href="walkthrough.html">Walkthrough</a>
       <a href="#calendar">Calendar</a>
       <a href="#replay">Replay</a>
@@ -33,7 +35,7 @@
 <header class="wrap head">
   <div class="eyebrow" id="planEyebrow">Buy Planner · plan date 2 Nov 2026</div>
   <h1>Spend <span id="h1Budget">₹8 Cr</span> where demand will be</h1>
-  <p>Twenty-two candidate blocks of hotel rooms and flight seats across sixteen destinations. The engine forecasts each one, sizes it, times the purchase, and picks the mix that earns the most for the risk you accept. Change anything below and it re-plans instantly.</p>
+  <p><span id="nBlocks">Forty</span> candidate blocks of hotel rooms and flight seats across <span id="nDests">twenty-eight</span> destinations. The engine forecasts each one, sizes it, times the purchase, and picks the mix that earns the most for the risk you accept. Change anything below and it re-plans instantly.</p>
   <div class="kpis" aria-live="polite">
     <div class="kpi k1"><small>Spend</small><b id="kSpend">–</b><span id="kSpendSub">of budget</span></div>
     <div class="kpi k2"><small>Expected profit</small><b id="kProfit">–</b><span id="kRoi">return</span></div>
@@ -63,7 +65,7 @@
       <div class="ask-chips" id="askChips"></div>
       <div class="ask-out" id="askOut" aria-live="polite"></div>
     </form>
-    <label for="budget"><span>Budget <output id="oBudget">₹8.00 Cr</output></span><input id="budget" type="range" min="100" max="1500" step="10" value="800"></label>
+    <label for="budget"><span>Budget <output id="oBudget">₹8.00 Cr</output></span><input id="budget" type="range" min="100" max="2000" step="10" value="800"></label>
     <div style="display:grid;gap:6px;font-size:.88rem;font-weight:500">Risk appetite
       <div class="seg" id="risk" role="group" aria-label="Risk appetite">
         <button type="button" data-v="0" aria-pressed="false">Bold</button>
@@ -218,5 +220,6 @@ uvicorn app.main:app --port 8000
 </footer>
 
 <script type="module" src="assets/js/planner.js"></script>
+<script src="assets/js/transitions.js"></script>
 </body>
 </html>

@@ -1,0 +1,30 @@
+/* Page transitions shared by every page.
+   Modern browsers use cross-document View Transitions; others get a JS fade-and-slide fallback. */
+@view-transition { navigation: auto; }
+.nav { view-transition-name: site-nav; }
+::view-transition-old(root) { animation: vt-out .28s cubic-bezier(.4,0,1,1) both; }
+::view-transition-new(root) { animation: vt-in .46s cubic-bezier(.2,.8,.2,1) both; }
+::view-transition-group(site-nav) { animation-duration: .35s; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-14px) scale(.985); filter: blur(2px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(22px) scale(.99); } }
+
+/* Fallback: fade out on leave, rise in on arrive */
+html.page-leaving body > :not(.nav):not(.page-bar) { transition: opacity .22s ease, transform .22s ease; opacity: 0; transform: translateY(-10px); }
+html.page-entering body > :not(.nav):not(.page-bar) { animation: vt-in .5s cubic-bezier(.2,.8,.2,1) both; }
+.page-bar { position: fixed; left: 0; top: env(safe-area-inset-top, 0px); height: 3px; width: 0; z-index: 100; background: linear-gradient(90deg, #F2A922, #E4572E); box-shadow: 0 0 10px rgba(242,169,34,.6); pointer-events: none; }
+html.page-leaving .page-bar { width: 85%; transition: width .5s cubic-bezier(.1,.7,.2,1); }
+
+/* Sliding active-tab indicator in page navs */
+.nav-ink { position: absolute; height: 2px; bottom: 0; background: #F2A922; border-radius: 2px; transition: left .35s cubic-bezier(.2,.8,.2,1), width .35s cubic-bezier(.2,.8,.2,1), opacity .2s; pointer-events: none; }
+
+/* Scroll reveal: only applied to elements that start below the fold */
+.reveal-pending { opacity: 0; transform: translateY(26px); }
+.revealed { animation: reveal-in .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--rd, 0ms); }
+@keyframes reveal-in { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  html.page-entering body > *, html.page-leaving body > * { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+  .reveal-pending { opacity: 1; transform: none; }
+  .revealed { animation: none; }
+}
