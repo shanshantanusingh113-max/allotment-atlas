@@ -134,9 +134,86 @@ export function backtestChart(svg, bt, names) {
       <text x="${x(v) + 6}" y="${yy + 11}">${(v * 100).toFixed(1)}%</text>`;
   }).join('');
   const nx = x(bt.naive_wape), mxm = x(bt.model_wape);
-  svg.innerHTML = `${bars}
+  svg.innerHTML = `
     <line x1="${nx}" x2="${nx}" y1="${top - 6}" y2="${H - 22}" style="stroke:var(--coral);stroke-width:2;stroke-dasharray:4 3"/>
     <text x="${nx}" y="${top - 9}" text-anchor="middle" style="fill:var(--coral)">naive ${(bt.naive_wape * 100).toFixed(1)}%</text>
-    <line x1="${mxm}" x2="${mxm}" y1="${top - 6}" y2="${H - 22}" style="stroke:var(--ink);stroke-width:2"/>
+    <line x1="${mxm}" x2="${mxm}" y1="${top - 6}" y2="${H - 22}" style="stroke:var(--ink);stroke-width:2"/>${bars}
     <text x="${mxm}" y="${H - 8}" text-anchor="middle" class="lbl">model ${(bt.model_wape * 100).toFixed(1)}%</text>`;
+}
+
+/** Tornado: profit with the plan held fixed when each input moves low and high. */
+export function tornadoChart(svg, sens) {
+  const rows = sens.factors, W = 900, l = 170, r = 24, top = 30, rowH = 40, H = top + rows.length * rowH + 16;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const base = sens.base_expected_profit;
+  const span = Math.max(...rows.flatMap(f => [f.low_fixed, f.high_fixed]).map(v => Math.abs(v - base))) * 1.02 || 1;
+  const x = lin(base - span, base + span, l, W - r), bx = x(base);
+  const bars = rows.map((f, i) => {
+    const y = top + i * rowH;
+    const seg = (v, lbl) => {
+      const xx = x(v), w = Math.abs(xx - bx), left = Math.min(xx, bx), right = xx > bx, good = v >= base;
+      const txt = `${lbl} ${v - base >= 0 ? '+' : '−'}${inr(Math.abs(v - base))}`;
+      const inside = w > 150;
+      const tx = inside ? (right ? xx - 8 : xx + 8) : (right ? xx + 6 : xx - 6);
+      const anchor = inside ? (right ? 'end' : 'start') : (right ? 'start' : 'end');
+      return `<rect x="${left}" y="${y + 7}" width="${Math.max(1, w)}" height="${rowH - 14}" rx="4" style="fill:${good ? 'var(--green)' : 'var(--coral)'}"/>
+        <text x="${tx}" y="${y + rowH / 2 + 4}" text-anchor="${anchor}" style="font-size:13px;${inside ? 'fill:#fff;font-weight:600' : ''}">${txt}</text>`;
+    };
+    return `<text x="${l - 14}" y="${y + rowH / 2 + 4}" text-anchor="end" class="lbl" style="font-size:13px">${esc(f.label)}</text>
+      ${seg(f.low_fixed, f.low_label)}${seg(f.high_fixed, f.high_label)}`;
+  }).join('');
+  svg.innerHTML = `${bars}<line x1="${bx}" x2="${bx}" y1="${top - 8}" y2="${H - 10}" style="stroke:var(--ink);stroke-width:2"/>
+    <text x="${bx}" y="${top - 13}" text-anchor="middle" class="lbl" style="font-size:13px">plan ${inr(base)}</text>`;
+}
+
+/** Cumulative cash for each policy across the season; progress 0..1 animates the draw. */
+export function raceChart(svg, rep, progress = 1) {
+  const W = 560, H = 280, l = 54, r = 132, top = 18, b = 30, n = rep.weeks.length;
+  const all = rep.policies.flatMap(p => p.series), ymin = Math.min(...all), ymax = Math.max(...all);
+  const pad = (ymax - ymin) * 0.08, x = lin(0, n - 1, l, W - r), y = lin(ymin - pad, ymax + pad, H - b, top);
+  const colors = { atlas: 'var(--gold)', greedy: 'var(--blue)', last_year: 'var(--violet)' };
+  const upto = Math.max(1, Math.round(progress * (n - 1)));
+  // End labels, pushed apart so they never overlap.
+  const ends = rep.policies.map(p => ({ p, y: y(p.series[upto]) })).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 14) ends[i].y = ends[i - 1].y + 14;
+  const labelY = Object.fromEntries(ends.map(e => [e.p.id, e.y]));
+  const lines = rep.policies.slice().sort((a, b) => (a.id === 'atlas') - (b.id === 'atlas')).map(p => {
+    const pts = p.series.slice(0, upto + 1), last = pts[pts.length - 1];
+    const d = pts.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('');
+    return `<path d="${d}" style="fill:none;stroke:${colors[p.id]};stroke-width:${p.id === 'atlas' ? 3.2 : 2}"/>
+      <circle cx="${x(pts.length - 1)}" cy="${y(last)}" r="${p.id === 'atlas' ? 5 : 4}" style="fill:${colors[p.id]}"/>
+      <text x="${x(pts.length - 1) + 8}" y="${labelY[p.id] + 4}" class="lbl" style="fill:${colors[p.id]}">${({ atlas: 'Atlas', greedy: 'Simple rule', last_year: 'Last year' })[p.id]} ${inr(last)}</text>`;
+  });
+  let ticks = '';
+  rep.weeks.forEach((w, i) => { if (w.slice(8, 10) <= '07' && i % 1 === 0) { const d = new Date(w + 'T00:00:00Z'); if ([0, 2, 4, 6, 8, 10].includes(d.getUTCMonth())) ticks += `<text x="${x(i)}" y="${H - 10}" text-anchor="middle">${MON[d.getUTCMonth()]}</text>`; } });
+  svg.innerHTML = `${yAxis(y, niceTicks(ymin - pad, ymax + pad, 4), l, W - r)}
+    <line x1="${l}" x2="${W - r}" y1="${y(0)}" y2="${y(0)}" style="stroke:var(--ink);stroke-width:1.2"/>
+    <text x="${l + 4}" y="${y(0) - 5}">break-even</text>${ticks}${lines.join('')}`;
+}
+
+/** Buy calendar: buy-by diamond, waiting line, and stay window bar per pick. */
+export function calendarChart(svg, picks, cands, planDate, selected) {
+  const W = 560, l = 150, r = 12, top = 26, rowH = 22, H = top + picks.length * rowH + 22;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const start = t(planDate), end = t('2027-10-31');
+  const x = lin(start, end, l, W - r);
+  let grid = '';
+  for (let d = new Date(Date.UTC(2026, 10, 1)); d.getTime() <= end; d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1))) {
+    const xx = x(Math.max(start, d.getTime()));
+    grid += `<line x1="${xx}" x2="${xx}" y1="${top - 6}" y2="${H - 18}" style="stroke:var(--line)"/>` +
+      (d.getUTCMonth() % 2 === 0 ? `<text x="${xx + 2}" y="${top - 10}">${MON[d.getUTCMonth()]}${d.getUTCMonth() === 0 ? ' ' + String(d.getUTCFullYear()).slice(2) : ''}</text>` : '');
+  }
+  const sorted = picks.slice().sort((a, b) => t(a.buy_by) - t(b.buy_by));
+  const rows = sorted.map((p, i) => {
+    const c = cands[p.id], y = top + i * rowH, bx = x(t(p.buy_by)), sx = x(t(c.start)), ex = x(t(c.end));
+    const sel = p.id === selected, soon = (t(p.buy_by) - start) / 864e5 <= 7;
+    return `<g data-id="${p.id}" style="cursor:pointer">
+      <rect x="0" y="${y}" width="${W}" height="${rowH}" style="fill:${sel ? 'var(--gold)' : 'transparent'};fill-opacity:.14"/>
+      <text x="${l - 8}" y="${y + 15}" text-anchor="end" class="${sel ? 'lbl' : ''}">${esc(p.label.length > 22 ? p.label.slice(0, 21) + '…' : p.label)}</text>
+      <line x1="${bx}" x2="${sx}" y1="${y + 11}" y2="${y + 11}" style="stroke:var(--line2);stroke-dasharray:3 3"/>
+      <rect x="${sx}" y="${y + 5}" width="${Math.max(3, ex - sx)}" height="12" rx="3" style="fill:${p.kind === 'hotel' ? 'var(--gold)' : 'var(--blue)'}"/>
+      <path d="M${bx} ${y + 4} l7 7 l-7 7 l-7 -7 z" style="fill:${soon ? 'var(--coral)' : 'var(--ink)'}"/></g>`;
+  }).join('');
+  svg.innerHTML = `${grid}<line x1="${x(start)}" x2="${x(start)}" y1="${top - 6}" y2="${H - 18}" style="stroke:var(--coral);stroke-width:2"/>
+    <text x="${x(start) + 3}" y="${H - 6}" style="fill:var(--coral)">today</text>${rows}`;
 }
