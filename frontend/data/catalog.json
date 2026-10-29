@@ -1,0 +1,2157 @@
+{
+ "meta": {
+  "name": "Allotment Atlas synthetic catalog v2",
+  "currency": "INR",
+  "plan_date": "2026-11-02",
+  "history_start": "2024-11-04",
+  "history_end": "2026-11-01",
+  "notes": "All values are synthetic. Monthly profiles are January to December demand multipliers."
+ },
+ "risk": {
+  "global_correlation": 0.15,
+  "region_correlation": 0.35
+ },
+ "hubs": {
+  "DEL": {
+   "name": "Delhi",
+   "lat": 28.6,
+   "lng": 77.2
+  },
+  "BOM": {
+   "name": "Mumbai",
+   "lat": 19.1,
+   "lng": 72.9
+  },
+  "BLR": {
+   "name": "Bengaluru",
+   "lat": 13.0,
+   "lng": 77.6
+  },
+  "HYD": {
+   "name": "Hyderabad",
+   "lat": 17.24,
+   "lng": 78.43
+  },
+  "MAA": {
+   "name": "Chennai",
+   "lat": 12.99,
+   "lng": 80.17
+  },
+  "CCU": {
+   "name": "Kolkata",
+   "lat": 22.65,
+   "lng": 88.45
+  }
+ },
+ "destinations": [
+  {
+   "code": "GOI",
+   "name": "Goa",
+   "lat": 15.4,
+   "lng": 73.9,
+   "hub": "BOM",
+   "region": "india",
+   "base_daily": 62,
+   "adr": 7800,
+   "profile": [
+    1.35,
+    1.0,
+    0.8,
+    0.55,
+    0.45,
+    0.25,
+    0.22,
+    0.3,
+    0.4,
+    0.75,
+    1.0,
+    1.75
+   ],
+   "cancel_rate": 0.11,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "DXB",
+   "name": "Dubai",
+   "lat": 25.2,
+   "lng": 55.3,
+   "hub": "DEL",
+   "region": "gulf",
+   "base_daily": 70,
+   "adr": 9800,
+   "profile": [
+    1.3,
+    1.15,
+    1.0,
+    0.75,
+    0.5,
+    0.35,
+    0.35,
+    0.42,
+    0.65,
+    1.05,
+    1.25,
+    1.6
+   ],
+   "cancel_rate": 0.12,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "BKK",
+   "name": "Bangkok",
+   "lat": 13.75,
+   "lng": 100.5,
+   "hub": "DEL",
+   "region": "sea",
+   "base_daily": 58,
+   "adr": 6400,
+   "profile": [
+    1.3,
+    1.0,
+    0.85,
+    0.95,
+    0.6,
+    0.52,
+    0.52,
+    0.52,
+    0.6,
+    0.9,
+    1.15,
+    1.5
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "DPS",
+   "name": "Bali",
+   "lat": -8.4,
+   "lng": 115.2,
+   "hub": "BLR",
+   "region": "sea",
+   "base_daily": 44,
+   "adr": 8900,
+   "profile": [
+    0.75,
+    0.55,
+    0.55,
+    0.7,
+    1.0,
+    1.35,
+    1.5,
+    1.45,
+    0.95,
+    0.75,
+    0.7,
+    1.15
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "SIN",
+   "name": "Singapore",
+   "lat": 1.35,
+   "lng": 103.8,
+   "hub": "BLR",
+   "region": "sea",
+   "base_daily": 48,
+   "adr": 13200,
+   "profile": [
+    0.8,
+    0.65,
+    0.7,
+    0.85,
+    1.25,
+    1.35,
+    0.95,
+    0.7,
+    0.7,
+    0.75,
+    0.8,
+    1.15
+   ],
+   "cancel_rate": 0.08,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "MLE",
+   "name": "Maldives",
+   "lat": 3.2,
+   "lng": 73.2,
+   "hub": "BLR",
+   "region": "india_ocean",
+   "base_daily": 26,
+   "adr": 24500,
+   "profile": [
+    1.3,
+    1.35,
+    1.15,
+    0.9,
+    0.5,
+    0.42,
+    0.5,
+    0.6,
+    0.65,
+    0.9,
+    1.0,
+    1.4
+   ],
+   "cancel_rate": 0.07,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "MKK",
+   "name": "Makkah",
+   "lat": 21.4,
+   "lng": 39.8,
+   "hub": "BOM",
+   "region": "gulf",
+   "base_daily": 52,
+   "adr": 8200,
+   "profile": [
+    0.85,
+    1.6,
+    1.5,
+    0.8,
+    0.9,
+    1.1,
+    0.7,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.85
+   ],
+   "cancel_rate": 0.04,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "HKT",
+   "name": "Phuket",
+   "lat": 7.9,
+   "lng": 98.4,
+   "hub": "BOM",
+   "region": "sea",
+   "base_daily": 30,
+   "adr": 7200,
+   "profile": [
+    1.35,
+    1.2,
+    1.0,
+    0.85,
+    0.5,
+    0.45,
+    0.5,
+    0.5,
+    0.45,
+    0.75,
+    1.1,
+    1.5
+   ],
+   "cancel_rate": 0.11,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "DAD",
+   "name": "Da Nang",
+   "lat": 16.05,
+   "lng": 108.2,
+   "hub": "DEL",
+   "region": "sea",
+   "base_daily": 24,
+   "adr": 5600,
+   "profile": [
+    1.0,
+    1.05,
+    1.1,
+    1.15,
+    1.2,
+    1.15,
+    1.05,
+    0.95,
+    0.65,
+    0.6,
+    0.8,
+    1.2
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "KUU",
+   "name": "Manali",
+   "lat": 32.2,
+   "lng": 77.2,
+   "hub": "DEL",
+   "region": "india",
+   "base_daily": 38,
+   "adr": 5200,
+   "profile": [
+    0.75,
+    0.6,
+    0.65,
+    0.95,
+    1.6,
+    1.55,
+    0.7,
+    0.55,
+    0.75,
+    1.05,
+    0.9,
+    1.3
+   ],
+   "cancel_rate": 0.13,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "JAI",
+   "name": "Jaipur",
+   "lat": 26.9,
+   "lng": 75.8,
+   "hub": "DEL",
+   "region": "india",
+   "base_daily": 46,
+   "adr": 6800,
+   "profile": [
+    1.2,
+    1.05,
+    0.85,
+    0.5,
+    0.35,
+    0.35,
+    0.45,
+    0.5,
+    0.75,
+    1.15,
+    1.6,
+    1.45
+   ],
+   "cancel_rate": 0.12,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "COK",
+   "name": "Kerala",
+   "lat": 9.9,
+   "lng": 76.3,
+   "hub": "MAA",
+   "region": "india",
+   "base_daily": 34,
+   "adr": 6100,
+   "profile": [
+    1.4,
+    1.25,
+    0.9,
+    0.7,
+    0.5,
+    0.4,
+    0.6,
+    0.85,
+    0.8,
+    0.95,
+    1.05,
+    1.5
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "SXR",
+   "name": "Srinagar",
+   "lat": 34.1,
+   "lng": 74.8,
+   "hub": "DEL",
+   "region": "india",
+   "base_daily": 22,
+   "adr": 5900,
+   "profile": [
+    0.6,
+    0.55,
+    0.7,
+    1.25,
+    1.65,
+    1.6,
+    1.0,
+    0.85,
+    1.05,
+    1.1,
+    0.75,
+    0.85
+   ],
+   "cancel_rate": 0.12,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "LON",
+   "name": "London",
+   "lat": 51.5,
+   "lng": -0.1,
+   "hub": "DEL",
+   "region": "europe",
+   "base_daily": 28,
+   "adr": 18400,
+   "profile": [
+    0.55,
+    0.6,
+    0.75,
+    0.95,
+    1.35,
+    1.45,
+    1.45,
+    1.35,
+    1.0,
+    0.85,
+    0.7,
+    1.05
+   ],
+   "cancel_rate": 0.09,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "KUL",
+   "name": "Kuala Lumpur",
+   "lat": 3.14,
+   "lng": 101.7,
+   "hub": "HYD",
+   "region": "sea",
+   "base_daily": 30,
+   "adr": 5900,
+   "profile": [
+    0.95,
+    0.8,
+    0.85,
+    0.95,
+    1.15,
+    1.2,
+    1.05,
+    0.9,
+    0.85,
+    0.95,
+    1.05,
+    1.3
+   ],
+   "cancel_rate": 0.09,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "TBS",
+   "name": "Tbilisi",
+   "lat": 41.7,
+   "lng": 44.8,
+   "hub": "DEL",
+   "region": "europe",
+   "base_daily": 14,
+   "adr": 6900,
+   "profile": [
+    0.5,
+    0.5,
+    0.65,
+    0.95,
+    1.45,
+    1.5,
+    1.35,
+    1.3,
+    1.15,
+    0.9,
+    0.6,
+    0.6
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "UDR",
+   "name": "Udaipur",
+   "lat": 24.58,
+   "lng": 73.71,
+   "hub": "DEL",
+   "region": "india",
+   "base_daily": 28,
+   "adr": 8200,
+   "profile": [
+    1.3,
+    1.15,
+    0.9,
+    0.55,
+    0.4,
+    0.35,
+    0.5,
+    0.6,
+    0.75,
+    1.1,
+    1.5,
+    1.6
+   ],
+   "cancel_rate": 0.12,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "IXL",
+   "name": "Leh",
+   "lat": 34.15,
+   "lng": 77.58,
+   "hub": "DEL",
+   "region": "india",
+   "base_daily": 18,
+   "adr": 6200,
+   "profile": [
+    0.15,
+    0.15,
+    0.3,
+    0.6,
+    1.5,
+    2.2,
+    2.3,
+    2.0,
+    1.4,
+    0.7,
+    0.2,
+    0.15
+   ],
+   "cancel_rate": 0.14,
+   "capacity_factor": 1.45
+  },
+  {
+   "code": "IXZ",
+   "name": "Andaman",
+   "lat": 11.62,
+   "lng": 92.73,
+   "hub": "MAA",
+   "region": "india",
+   "base_daily": 16,
+   "adr": 7400,
+   "profile": [
+    1.45,
+    1.4,
+    1.25,
+    1.05,
+    0.8,
+    0.4,
+    0.35,
+    0.4,
+    0.5,
+    0.9,
+    1.15,
+    1.6
+   ],
+   "cancel_rate": 0.12,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "VNS",
+   "name": "Varanasi",
+   "lat": 25.32,
+   "lng": 82.99,
+   "hub": "CCU",
+   "region": "india",
+   "base_daily": 26,
+   "adr": 4800,
+   "profile": [
+    1.25,
+    1.15,
+    1.05,
+    0.8,
+    0.65,
+    0.6,
+    0.7,
+    0.75,
+    0.85,
+    1.15,
+    1.45,
+    1.25
+   ],
+   "cancel_rate": 0.08,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "KTM",
+   "name": "Kathmandu",
+   "lat": 27.7,
+   "lng": 85.31,
+   "hub": "CCU",
+   "region": "south_asia",
+   "base_daily": 20,
+   "adr": 6100,
+   "profile": [
+    0.7,
+    0.8,
+    1.15,
+    1.4,
+    1.0,
+    0.6,
+    0.55,
+    0.6,
+    0.95,
+    1.5,
+    1.25,
+    0.85
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "CMB",
+   "name": "Sri Lanka",
+   "lat": 6.93,
+   "lng": 79.85,
+   "hub": "MAA",
+   "region": "south_asia",
+   "base_daily": 24,
+   "adr": 6900,
+   "profile": [
+    1.4,
+    1.3,
+    1.15,
+    1.0,
+    0.75,
+    0.65,
+    0.85,
+    0.95,
+    0.8,
+    0.8,
+    0.95,
+    1.4
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "MRU",
+   "name": "Mauritius",
+   "lat": -20.16,
+   "lng": 57.5,
+   "hub": "BOM",
+   "region": "india_ocean",
+   "base_daily": 12,
+   "adr": 15800,
+   "profile": [
+    1.05,
+    0.85,
+    0.85,
+    1.0,
+    1.15,
+    0.9,
+    0.85,
+    0.95,
+    1.0,
+    1.1,
+    1.25,
+    1.35
+   ],
+   "cancel_rate": 0.08,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "IST",
+   "name": "Istanbul",
+   "lat": 41.01,
+   "lng": 28.98,
+   "hub": "DEL",
+   "region": "europe",
+   "base_daily": 22,
+   "adr": 9400,
+   "profile": [
+    0.55,
+    0.55,
+    0.75,
+    1.05,
+    1.3,
+    1.35,
+    1.4,
+    1.3,
+    1.15,
+    1.0,
+    0.75,
+    0.85
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "PAR",
+   "name": "Paris",
+   "lat": 48.86,
+   "lng": 2.35,
+   "hub": "DEL",
+   "region": "europe",
+   "base_daily": 20,
+   "adr": 17600,
+   "profile": [
+    0.6,
+    0.6,
+    0.8,
+    1.0,
+    1.3,
+    1.4,
+    1.45,
+    1.3,
+    1.05,
+    0.85,
+    0.7,
+    0.95
+   ],
+   "cancel_rate": 0.09,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "GYD",
+   "name": "Baku",
+   "lat": 40.41,
+   "lng": 49.87,
+   "hub": "DEL",
+   "region": "central_asia",
+   "base_daily": 12,
+   "adr": 6500,
+   "profile": [
+    0.45,
+    0.5,
+    0.75,
+    1.05,
+    1.45,
+    1.5,
+    1.35,
+    1.3,
+    1.2,
+    0.95,
+    0.6,
+    0.85
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "ALA",
+   "name": "Almaty",
+   "lat": 43.24,
+   "lng": 76.95,
+   "hub": "DEL",
+   "region": "central_asia",
+   "base_daily": 10,
+   "adr": 6200,
+   "profile": [
+    1.05,
+    0.9,
+    0.75,
+    0.9,
+    1.25,
+    1.4,
+    1.35,
+    1.25,
+    1.05,
+    0.8,
+    0.55,
+    0.75
+   ],
+   "cancel_rate": 0.1,
+   "capacity_factor": 1.55
+  },
+  {
+   "code": "TYO",
+   "name": "Tokyo",
+   "lat": 35.68,
+   "lng": 139.69,
+   "hub": "DEL",
+   "region": "east_asia",
+   "base_daily": 16,
+   "adr": 15200,
+   "profile": [
+    0.7,
+    0.7,
+    1.35,
+    1.6,
+    1.15,
+    0.8,
+    0.8,
+    0.85,
+    0.8,
+    1.15,
+    1.25,
+    0.85
+   ],
+   "cancel_rate": 0.08,
+   "capacity_factor": 1.55
+  }
+ ],
+ "events": [
+  {
+   "name": "Christmas and New Year",
+   "start": "2024-12-20",
+   "end": "2025-01-03",
+   "intensity": 0.55,
+   "destinations": []
+  },
+  {
+   "name": "Christmas and New Year",
+   "start": "2025-12-20",
+   "end": "2026-01-03",
+   "intensity": 0.55,
+   "destinations": []
+  },
+  {
+   "name": "Christmas and New Year",
+   "start": "2026-12-20",
+   "end": "2027-01-03",
+   "intensity": 0.55,
+   "destinations": []
+  },
+  {
+   "name": "Christmas and New Year",
+   "start": "2027-12-20",
+   "end": "2028-01-03",
+   "intensity": 0.55,
+   "destinations": []
+  },
+  {
+   "name": "Indian school summer holidays",
+   "start": "2024-05-15",
+   "end": "2024-06-15",
+   "intensity": 0.3,
+   "destinations": [
+    "ALA",
+    "BKK",
+    "CMB",
+    "COK",
+    "DAD",
+    "DPS",
+    "DXB",
+    "GOI",
+    "GYD",
+    "HKT",
+    "IST",
+    "IXL",
+    "IXZ",
+    "JAI",
+    "KTM",
+    "KUL",
+    "KUU",
+    "LON",
+    "MLE",
+    "MRU",
+    "PAR",
+    "SIN",
+    "SXR",
+    "TBS",
+    "TYO",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Indian school summer holidays",
+   "start": "2025-05-15",
+   "end": "2025-06-15",
+   "intensity": 0.3,
+   "destinations": [
+    "ALA",
+    "BKK",
+    "CMB",
+    "COK",
+    "DAD",
+    "DPS",
+    "DXB",
+    "GOI",
+    "GYD",
+    "HKT",
+    "IST",
+    "IXL",
+    "IXZ",
+    "JAI",
+    "KTM",
+    "KUL",
+    "KUU",
+    "LON",
+    "MLE",
+    "MRU",
+    "PAR",
+    "SIN",
+    "SXR",
+    "TBS",
+    "TYO",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Indian school summer holidays",
+   "start": "2026-05-15",
+   "end": "2026-06-15",
+   "intensity": 0.3,
+   "destinations": [
+    "ALA",
+    "BKK",
+    "CMB",
+    "COK",
+    "DAD",
+    "DPS",
+    "DXB",
+    "GOI",
+    "GYD",
+    "HKT",
+    "IST",
+    "IXL",
+    "IXZ",
+    "JAI",
+    "KTM",
+    "KUL",
+    "KUU",
+    "LON",
+    "MLE",
+    "MRU",
+    "PAR",
+    "SIN",
+    "SXR",
+    "TBS",
+    "TYO",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Indian school summer holidays",
+   "start": "2027-05-15",
+   "end": "2027-06-15",
+   "intensity": 0.3,
+   "destinations": [
+    "ALA",
+    "BKK",
+    "CMB",
+    "COK",
+    "DAD",
+    "DPS",
+    "DXB",
+    "GOI",
+    "GYD",
+    "HKT",
+    "IST",
+    "IXL",
+    "IXZ",
+    "JAI",
+    "KTM",
+    "KUL",
+    "KUU",
+    "LON",
+    "MLE",
+    "MRU",
+    "PAR",
+    "SIN",
+    "SXR",
+    "TBS",
+    "TYO",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Wedding season",
+   "start": "2024-11-15",
+   "end": "2024-12-12",
+   "intensity": 0.35,
+   "destinations": [
+    "COK",
+    "GOI",
+    "IXZ",
+    "JAI",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Wedding season",
+   "start": "2025-11-15",
+   "end": "2025-12-12",
+   "intensity": 0.35,
+   "destinations": [
+    "COK",
+    "GOI",
+    "IXZ",
+    "JAI",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Wedding season",
+   "start": "2026-11-15",
+   "end": "2026-12-12",
+   "intensity": 0.35,
+   "destinations": [
+    "COK",
+    "GOI",
+    "IXZ",
+    "JAI",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Wedding season",
+   "start": "2027-11-15",
+   "end": "2027-12-12",
+   "intensity": 0.35,
+   "destinations": [
+    "COK",
+    "GOI",
+    "IXZ",
+    "JAI",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Diwali",
+   "start": "2024-10-29",
+   "end": "2024-11-04",
+   "intensity": 0.4,
+   "destinations": [
+    "ALA",
+    "BKK",
+    "CMB",
+    "COK",
+    "DAD",
+    "DPS",
+    "DXB",
+    "GOI",
+    "GYD",
+    "HKT",
+    "IST",
+    "IXZ",
+    "JAI",
+    "KTM",
+    "KUL",
+    "KUU",
+    "MLE",
+    "MRU",
+    "PAR",
+    "SIN",
+    "SXR",
+    "TYO",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Diwali",
+   "start": "2025-10-18",
+   "end": "2025-10-24",
+   "intensity": 0.4,
+   "destinations": [
+    "ALA",
+    "BKK",
+    "CMB",
+    "COK",
+    "DAD",
+    "DPS",
+    "DXB",
+    "GOI",
+    "GYD",
+    "HKT",
+    "IST",
+    "IXZ",
+    "JAI",
+    "KTM",
+    "KUL",
+    "KUU",
+    "MLE",
+    "MRU",
+    "PAR",
+    "SIN",
+    "SXR",
+    "TYO",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Diwali",
+   "start": "2026-11-06",
+   "end": "2026-11-12",
+   "intensity": 0.4,
+   "destinations": [
+    "ALA",
+    "BKK",
+    "CMB",
+    "COK",
+    "DAD",
+    "DPS",
+    "DXB",
+    "GOI",
+    "GYD",
+    "HKT",
+    "IST",
+    "IXZ",
+    "JAI",
+    "KTM",
+    "KUL",
+    "KUU",
+    "MLE",
+    "MRU",
+    "PAR",
+    "SIN",
+    "SXR",
+    "TYO",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Diwali",
+   "start": "2027-10-27",
+   "end": "2027-11-02",
+   "intensity": 0.4,
+   "destinations": [
+    "ALA",
+    "BKK",
+    "CMB",
+    "COK",
+    "DAD",
+    "DPS",
+    "DXB",
+    "GOI",
+    "GYD",
+    "HKT",
+    "IST",
+    "IXZ",
+    "JAI",
+    "KTM",
+    "KUL",
+    "KUU",
+    "MLE",
+    "MRU",
+    "PAR",
+    "SIN",
+    "SXR",
+    "TYO",
+    "UDR"
+   ]
+  },
+  {
+   "name": "Ramadan and Umrah",
+   "start": "2025-03-01",
+   "end": "2025-03-30",
+   "intensity": 0.65,
+   "destinations": [
+    "MKK"
+   ]
+  },
+  {
+   "name": "Ramadan and Umrah",
+   "start": "2026-02-18",
+   "end": "2026-03-19",
+   "intensity": 0.65,
+   "destinations": [
+    "MKK"
+   ]
+  },
+  {
+   "name": "Ramadan and Umrah",
+   "start": "2027-02-08",
+   "end": "2027-03-09",
+   "intensity": 0.65,
+   "destinations": [
+    "MKK"
+   ]
+  },
+  {
+   "name": "Dubai Shopping Festival",
+   "start": "2024-12-13",
+   "end": "2025-01-26",
+   "intensity": 0.2,
+   "destinations": [
+    "DXB"
+   ]
+  },
+  {
+   "name": "Dubai Shopping Festival",
+   "start": "2025-12-05",
+   "end": "2026-01-11",
+   "intensity": 0.2,
+   "destinations": [
+    "DXB"
+   ]
+  },
+  {
+   "name": "Dubai Shopping Festival",
+   "start": "2026-12-11",
+   "end": "2027-01-24",
+   "intensity": 0.2,
+   "destinations": [
+    "DXB"
+   ]
+  },
+  {
+   "name": "Songkran",
+   "start": "2025-04-12",
+   "end": "2025-04-16",
+   "intensity": 0.35,
+   "destinations": [
+    "BKK",
+    "HKT"
+   ]
+  },
+  {
+   "name": "Songkran",
+   "start": "2026-04-12",
+   "end": "2026-04-16",
+   "intensity": 0.35,
+   "destinations": [
+    "BKK",
+    "HKT"
+   ]
+  },
+  {
+   "name": "Songkran",
+   "start": "2027-04-12",
+   "end": "2027-04-16",
+   "intensity": 0.35,
+   "destinations": [
+    "BKK",
+    "HKT"
+   ]
+  },
+  {
+   "name": "Holi",
+   "start": "2025-03-12",
+   "end": "2025-03-16",
+   "intensity": 0.3,
+   "destinations": [
+    "VNS",
+    "JAI",
+    "UDR",
+    "GOI"
+   ]
+  },
+  {
+   "name": "Holi",
+   "start": "2026-03-02",
+   "end": "2026-03-06",
+   "intensity": 0.3,
+   "destinations": [
+    "VNS",
+    "JAI",
+    "UDR",
+    "GOI"
+   ]
+  },
+  {
+   "name": "Holi",
+   "start": "2027-03-20",
+   "end": "2027-03-24",
+   "intensity": 0.3,
+   "destinations": [
+    "VNS",
+    "JAI",
+    "UDR",
+    "GOI"
+   ]
+  },
+  {
+   "name": "Dev Deepawali",
+   "start": "2024-11-13",
+   "end": "2024-11-17",
+   "intensity": 0.55,
+   "destinations": [
+    "VNS"
+   ]
+  },
+  {
+   "name": "Dev Deepawali",
+   "start": "2025-11-03",
+   "end": "2025-11-07",
+   "intensity": 0.55,
+   "destinations": [
+    "VNS"
+   ]
+  },
+  {
+   "name": "Dev Deepawali",
+   "start": "2026-11-22",
+   "end": "2026-11-26",
+   "intensity": 0.55,
+   "destinations": [
+    "VNS"
+   ]
+  },
+  {
+   "name": "Durga Puja",
+   "start": "2024-10-09",
+   "end": "2024-10-13",
+   "intensity": 0.35,
+   "destinations": [
+    "KTM",
+    "VNS",
+    "IXZ",
+    "CMB"
+   ]
+  },
+  {
+   "name": "Durga Puja",
+   "start": "2025-09-28",
+   "end": "2025-10-02",
+   "intensity": 0.35,
+   "destinations": [
+    "KTM",
+    "VNS",
+    "IXZ",
+    "CMB"
+   ]
+  },
+  {
+   "name": "Durga Puja",
+   "start": "2026-10-17",
+   "end": "2026-10-21",
+   "intensity": 0.35,
+   "destinations": [
+    "KTM",
+    "VNS",
+    "IXZ",
+    "CMB"
+   ]
+  },
+  {
+   "name": "Durga Puja",
+   "start": "2027-10-06",
+   "end": "2027-10-10",
+   "intensity": 0.35,
+   "destinations": [
+    "KTM",
+    "VNS",
+    "IXZ",
+    "CMB"
+   ]
+  },
+  {
+   "name": "Hajj",
+   "start": "2025-06-01",
+   "end": "2025-06-09",
+   "intensity": 0.8,
+   "destinations": [
+    "MKK"
+   ]
+  },
+  {
+   "name": "Hajj",
+   "start": "2026-05-21",
+   "end": "2026-05-30",
+   "intensity": 0.8,
+   "destinations": [
+    "MKK"
+   ]
+  },
+  {
+   "name": "Hajj",
+   "start": "2027-05-11",
+   "end": "2027-05-20",
+   "intensity": 0.8,
+   "destinations": [
+    "MKK"
+   ]
+  },
+  {
+   "name": "Cherry blossom",
+   "start": "2025-03-22",
+   "end": "2025-04-08",
+   "intensity": 0.45,
+   "destinations": [
+    "TYO"
+   ]
+  },
+  {
+   "name": "Cherry blossom",
+   "start": "2026-03-22",
+   "end": "2026-04-08",
+   "intensity": 0.45,
+   "destinations": [
+    "TYO"
+   ]
+  },
+  {
+   "name": "Cherry blossom",
+   "start": "2027-03-22",
+   "end": "2027-04-08",
+   "intensity": 0.45,
+   "destinations": [
+    "TYO"
+   ]
+  },
+  {
+   "name": "Christmas markets",
+   "start": "2024-11-28",
+   "end": "2024-12-23",
+   "intensity": 0.25,
+   "destinations": [
+    "PAR",
+    "IST"
+   ]
+  },
+  {
+   "name": "Christmas markets",
+   "start": "2025-11-28",
+   "end": "2025-12-23",
+   "intensity": 0.25,
+   "destinations": [
+    "PAR",
+    "IST"
+   ]
+  },
+  {
+   "name": "Christmas markets",
+   "start": "2026-11-28",
+   "end": "2026-12-23",
+   "intensity": 0.25,
+   "destinations": [
+    "PAR",
+    "IST"
+   ]
+  },
+  {
+   "name": "Esala Perahera",
+   "start": "2025-08-01",
+   "end": "2025-08-10",
+   "intensity": 0.3,
+   "destinations": [
+    "CMB"
+   ]
+  },
+  {
+   "name": "Esala Perahera",
+   "start": "2026-08-01",
+   "end": "2026-08-10",
+   "intensity": 0.3,
+   "destinations": [
+    "CMB"
+   ]
+  },
+  {
+   "name": "Esala Perahera",
+   "start": "2027-08-01",
+   "end": "2027-08-10",
+   "intensity": 0.3,
+   "destinations": [
+    "CMB"
+   ]
+  },
+  {
+   "name": "Independence Day long weekend",
+   "start": "2025-08-14",
+   "end": "2025-08-17",
+   "intensity": 0.3,
+   "destinations": [
+    "GOI",
+    "JAI",
+    "COK",
+    "KUU",
+    "SXR",
+    "UDR",
+    "IXL",
+    "IXZ",
+    "VNS"
+   ]
+  },
+  {
+   "name": "Independence Day long weekend",
+   "start": "2026-08-14",
+   "end": "2026-08-17",
+   "intensity": 0.3,
+   "destinations": [
+    "GOI",
+    "JAI",
+    "COK",
+    "KUU",
+    "SXR",
+    "UDR",
+    "IXL",
+    "IXZ",
+    "VNS"
+   ]
+  },
+  {
+   "name": "Independence Day long weekend",
+   "start": "2027-08-14",
+   "end": "2027-08-17",
+   "intensity": 0.3,
+   "destinations": [
+    "GOI",
+    "JAI",
+    "COK",
+    "KUU",
+    "SXR",
+    "UDR",
+    "IXL",
+    "IXZ",
+    "VNS"
+   ]
+  }
+ ],
+ "blocks": [
+  {
+   "id": "GOI-NYE",
+   "dest": "GOI",
+   "label": "Goa beach resorts",
+   "kind": "hotel",
+   "start": "2026-12-20",
+   "end": "2027-01-02",
+   "share": 0.42,
+   "cost": 6000,
+   "price": 7600,
+   "salvage": 1500,
+   "contract": "hard",
+   "tags": [
+    "festival"
+   ]
+  },
+  {
+   "id": "GOI-DIW",
+   "dest": "GOI",
+   "label": "Goa Diwali weekend",
+   "kind": "hotel",
+   "start": "2026-11-05",
+   "end": "2026-11-12",
+   "share": 0.3,
+   "cost": 4800,
+   "price": 6100,
+   "salvage": 1200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "DXB-DEC",
+   "dest": "DXB",
+   "label": "Dubai city hotels",
+   "kind": "hotel",
+   "start": "2026-12-12",
+   "end": "2026-12-31",
+   "share": 0.36,
+   "cost": 7200,
+   "price": 9100,
+   "salvage": 2200,
+   "contract": "hard",
+   "tags": [
+    "festival"
+   ]
+  },
+  {
+   "id": "DXB-FLT",
+   "dest": "DXB",
+   "label": "DEL→DXB seats",
+   "kind": "flight",
+   "start": "2026-12-15",
+   "end": "2026-12-28",
+   "share": 0.3,
+   "cost": 14500,
+   "price": 17700,
+   "salvage": 6000,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "BKK-NYE",
+   "dest": "BKK",
+   "label": "Bangkok hotels",
+   "kind": "hotel",
+   "start": "2026-12-22",
+   "end": "2027-01-05",
+   "share": 0.34,
+   "cost": 4700,
+   "price": 6000,
+   "salvage": 1300,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "BKK-SGK",
+   "dest": "BKK",
+   "label": "Bangkok Songkran",
+   "kind": "hotel",
+   "start": "2027-04-10",
+   "end": "2027-04-18",
+   "share": 0.3,
+   "cost": 4300,
+   "price": 5500,
+   "salvage": 1200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "HKT-DEC",
+   "dest": "HKT",
+   "label": "Phuket beach hotels",
+   "kind": "hotel",
+   "start": "2026-12-18",
+   "end": "2027-01-04",
+   "share": 0.34,
+   "cost": 5400,
+   "price": 6900,
+   "salvage": 1500,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "DPS-SUM",
+   "dest": "DPS",
+   "label": "Bali villas",
+   "kind": "hotel",
+   "start": "2027-07-01",
+   "end": "2027-08-15",
+   "share": 0.3,
+   "cost": 6400,
+   "price": 8100,
+   "salvage": 1900,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "SIN-SUM",
+   "dest": "SIN",
+   "label": "Singapore hotels",
+   "kind": "hotel",
+   "start": "2027-05-15",
+   "end": "2027-06-15",
+   "share": 0.28,
+   "cost": 9900,
+   "price": 12600,
+   "salvage": 3500,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "SIN-FLT",
+   "dest": "SIN",
+   "label": "BLR→SIN seats",
+   "kind": "flight",
+   "start": "2027-05-15",
+   "end": "2027-06-10",
+   "share": 0.24,
+   "cost": 11800,
+   "price": 14400,
+   "salvage": 5200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "MLE-FEB",
+   "dest": "MLE",
+   "label": "Maldives resorts",
+   "kind": "hotel",
+   "start": "2027-02-01",
+   "end": "2027-02-28",
+   "share": 0.3,
+   "cost": 18800,
+   "price": 23900,
+   "salvage": 4500,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "MKK-RAM",
+   "dest": "MKK",
+   "label": "Makkah hotels, Ramadan",
+   "kind": "hotel",
+   "start": "2027-02-08",
+   "end": "2027-03-09",
+   "share": 0.44,
+   "cost": 6100,
+   "price": 7700,
+   "salvage": 2600,
+   "contract": "hard",
+   "tags": [
+    "religious"
+   ]
+  },
+  {
+   "id": "DAD-SPR",
+   "dest": "DAD",
+   "label": "Da Nang hotels",
+   "kind": "hotel",
+   "start": "2027-03-01",
+   "end": "2027-05-31",
+   "share": 0.28,
+   "cost": 4000,
+   "price": 5100,
+   "salvage": 1100,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "KUU-SUM",
+   "dest": "KUU",
+   "label": "Manali hotels",
+   "kind": "hotel",
+   "start": "2027-05-15",
+   "end": "2027-06-15",
+   "share": 0.36,
+   "cost": 3900,
+   "price": 5000,
+   "salvage": 1000,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "JAI-WED",
+   "dest": "JAI",
+   "label": "Jaipur heritage, weddings",
+   "kind": "hotel",
+   "start": "2026-11-15",
+   "end": "2026-12-12",
+   "share": 0.32,
+   "cost": 5100,
+   "price": 6500,
+   "salvage": 1400,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "COK-WIN",
+   "dest": "COK",
+   "label": "Kerala houseboats",
+   "kind": "hotel",
+   "start": "2026-12-20",
+   "end": "2027-01-31",
+   "share": 0.3,
+   "cost": 4500,
+   "price": 5700,
+   "salvage": 1200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "SXR-SPR",
+   "dest": "SXR",
+   "label": "Srinagar hotels",
+   "kind": "hotel",
+   "start": "2027-04-15",
+   "end": "2027-06-10",
+   "share": 0.3,
+   "cost": 4400,
+   "price": 5600,
+   "salvage": 1100,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "LON-SUM",
+   "dest": "LON",
+   "label": "London hotels",
+   "kind": "hotel",
+   "start": "2027-06-01",
+   "end": "2027-07-31",
+   "share": 0.22,
+   "cost": 14200,
+   "price": 18000,
+   "salvage": 5200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "KUL-DEC",
+   "dest": "KUL",
+   "label": "Kuala Lumpur hotels",
+   "kind": "hotel",
+   "start": "2026-12-15",
+   "end": "2027-01-05",
+   "share": 0.28,
+   "cost": 4300,
+   "price": 5500,
+   "salvage": 1300,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "TBS-SUM",
+   "dest": "TBS",
+   "label": "Tbilisi hotels",
+   "kind": "hotel",
+   "start": "2027-05-01",
+   "end": "2027-06-30",
+   "share": 0.3,
+   "cost": 5000,
+   "price": 6400,
+   "salvage": 1300,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "GOI-FLT",
+   "dest": "GOI",
+   "label": "BOM→GOI seats",
+   "kind": "flight",
+   "start": "2026-12-24",
+   "end": "2026-12-31",
+   "share": 0.26,
+   "cost": 5200,
+   "price": 6300,
+   "salvage": 1800,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "BKK-FLT",
+   "dest": "BKK",
+   "label": "DEL→BKK seats",
+   "kind": "flight",
+   "start": "2026-12-20",
+   "end": "2027-01-03",
+   "share": 0.22,
+   "cost": 11200,
+   "price": 13700,
+   "salvage": 4300,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "UDR-WED",
+   "dest": "UDR",
+   "label": "Udaipur palace hotels, weddings",
+   "kind": "hotel",
+   "start": "2026-11-20",
+   "end": "2026-12-15",
+   "share": 0.34,
+   "cost": 6500,
+   "price": 8300,
+   "salvage": 1600,
+   "contract": "hard",
+   "tags": [
+    "festival"
+   ]
+  },
+  {
+   "id": "UDR-NYE",
+   "dest": "UDR",
+   "label": "Udaipur New Year",
+   "kind": "hotel",
+   "start": "2026-12-24",
+   "end": "2027-01-02",
+   "share": 0.3,
+   "cost": 7000,
+   "price": 8900,
+   "salvage": 1800,
+   "contract": "hard",
+   "tags": [
+    "festival"
+   ]
+  },
+  {
+   "id": "IXL-SUM",
+   "dest": "IXL",
+   "label": "Leh summer camps and hotels",
+   "kind": "hotel",
+   "start": "2027-06-01",
+   "end": "2027-08-15",
+   "share": 0.32,
+   "cost": 4900,
+   "price": 6200,
+   "salvage": 1200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "IXZ-WIN",
+   "dest": "IXZ",
+   "label": "Andaman beach resorts",
+   "kind": "hotel",
+   "start": "2026-12-20",
+   "end": "2027-01-31",
+   "share": 0.3,
+   "cost": 5600,
+   "price": 7100,
+   "salvage": 1400,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "VNS-DEV",
+   "dest": "VNS",
+   "label": "Varanasi Dev Deepawali",
+   "kind": "hotel",
+   "start": "2026-11-20",
+   "end": "2026-11-28",
+   "share": 0.4,
+   "cost": 3800,
+   "price": 4800,
+   "salvage": 1000,
+   "contract": "hard",
+   "tags": [
+    "religious"
+   ]
+  },
+  {
+   "id": "VNS-HOL",
+   "dest": "VNS",
+   "label": "Varanasi Holi",
+   "kind": "hotel",
+   "start": "2027-03-18",
+   "end": "2027-03-25",
+   "share": 0.34,
+   "cost": 3600,
+   "price": 4600,
+   "salvage": 900,
+   "contract": "hard",
+   "tags": [
+    "festival"
+   ]
+  },
+  {
+   "id": "KTM-SPR",
+   "dest": "KTM",
+   "label": "Kathmandu spring treks",
+   "kind": "hotel",
+   "start": "2027-03-15",
+   "end": "2027-05-10",
+   "share": 0.3,
+   "cost": 4600,
+   "price": 5800,
+   "salvage": 1200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "KTM-AUT",
+   "dest": "KTM",
+   "label": "Kathmandu autumn season",
+   "kind": "hotel",
+   "start": "2027-09-25",
+   "end": "2027-10-31",
+   "share": 0.3,
+   "cost": 4700,
+   "price": 6000,
+   "salvage": 1200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "KTM-FLT",
+   "dest": "KTM",
+   "label": "CCU→KTM seats",
+   "kind": "flight",
+   "start": "2027-04-01",
+   "end": "2027-04-30",
+   "share": 0.2,
+   "cost": 8200,
+   "price": 10000,
+   "salvage": 2000,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "CMB-WIN",
+   "dest": "CMB",
+   "label": "Sri Lanka beach hotels",
+   "kind": "hotel",
+   "start": "2026-12-18",
+   "end": "2027-02-15",
+   "share": 0.3,
+   "cost": 5100,
+   "price": 6500,
+   "salvage": 1300,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "MRU-DEC",
+   "dest": "MRU",
+   "label": "Mauritius resorts",
+   "kind": "hotel",
+   "start": "2026-12-15",
+   "end": "2027-01-10",
+   "share": 0.28,
+   "cost": 12800,
+   "price": 16300,
+   "salvage": 3200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "IST-SUM",
+   "dest": "IST",
+   "label": "Istanbul hotels",
+   "kind": "hotel",
+   "start": "2027-05-15",
+   "end": "2027-07-15",
+   "share": 0.26,
+   "cost": 7200,
+   "price": 9100,
+   "salvage": 1800,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "PAR-SUM",
+   "dest": "PAR",
+   "label": "Paris hotels",
+   "kind": "hotel",
+   "start": "2027-06-15",
+   "end": "2027-08-15",
+   "share": 0.2,
+   "cost": 13800,
+   "price": 17500,
+   "salvage": 3400,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "GYD-SUM",
+   "dest": "GYD",
+   "label": "Baku hotels",
+   "kind": "hotel",
+   "start": "2027-05-01",
+   "end": "2027-06-30",
+   "share": 0.3,
+   "cost": 4900,
+   "price": 6200,
+   "salvage": 1200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "ALA-SUM",
+   "dest": "ALA",
+   "label": "Almaty hotels",
+   "kind": "hotel",
+   "start": "2027-05-20",
+   "end": "2027-07-31",
+   "share": 0.3,
+   "cost": 4600,
+   "price": 5800,
+   "salvage": 1200,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "TYO-SAK",
+   "dest": "TYO",
+   "label": "Tokyo cherry blossom",
+   "kind": "hotel",
+   "start": "2027-03-20",
+   "end": "2027-04-10",
+   "share": 0.3,
+   "cost": 12100,
+   "price": 15400,
+   "salvage": 3000,
+   "contract": "hard",
+   "tags": [
+    "festival"
+   ]
+  },
+  {
+   "id": "TYO-FLT",
+   "dest": "TYO",
+   "label": "DEL→NRT seats",
+   "kind": "flight",
+   "start": "2027-03-18",
+   "end": "2027-04-08",
+   "share": 0.24,
+   "cost": 32500,
+   "price": 39600,
+   "salvage": 8100,
+   "contract": "hard",
+   "tags": []
+  },
+  {
+   "id": "MKK-HAJ",
+   "dest": "MKK",
+   "label": "Makkah hotels, Hajj",
+   "kind": "hotel",
+   "start": "2027-05-12",
+   "end": "2027-05-22",
+   "share": 0.4,
+   "cost": 9800,
+   "price": 12400,
+   "salvage": 2400,
+   "contract": "hard",
+   "tags": [
+    "religious"
+   ]
+  }
+ ],
+ "shocks": [
+  {
+   "id": "gulf_advisory",
+   "label": "Gulf travel advisory",
+   "description": "A travel advisory cuts Dubai demand by 35% and makes it far less predictable.",
+   "demand": {
+    "DXB": 0.65
+   },
+   "sigma": {
+    "DXB": 1.5
+   },
+   "flight_cost": 1.0
+  },
+  {
+   "id": "vietnam_visa",
+   "label": "Vietnam visa-free for Indians",
+   "description": "Visa-free entry lifts Da Nang demand by 60%.",
+   "demand": {
+    "DAD": 1.6
+   },
+   "sigma": {
+    "DAD": 1.2
+   },
+   "flight_cost": 1.0
+  },
+  {
+   "id": "cyclone",
+   "label": "Cyclone season warning",
+   "description": "A cyclone warning cuts Phuket and Bali demand by 30% and raises uncertainty.",
+   "demand": {
+    "HKT": 0.7,
+    "DPS": 0.7
+   },
+   "sigma": {
+    "HKT": 1.6,
+    "DPS": 1.6
+   },
+   "flight_cost": 1.0
+  },
+  {
+   "id": "bangkok_concert",
+   "label": "Stadium concert in Bangkok",
+   "description": "A sold-out stadium tour lifts Bangkok demand by 35%.",
+   "demand": {
+    "BKK": 1.35
+   },
+   "sigma": {},
+   "flight_cost": 1.0
+  },
+  {
+   "id": "fuel_spike",
+   "label": "Jet fuel price spike",
+   "description": "Fuel surcharges raise flight block costs by 12%.",
+   "demand": {},
+   "sigma": {},
+   "flight_cost": 1.12
+  },
+  {
+   "id": "nepal_quake",
+   "label": "Earthquake alert in Nepal",
+   "description": "An earthquake alert cuts Kathmandu demand by 45% and makes it hard to predict.",
+   "demand": {
+    "KTM": 0.55
+   },
+   "sigma": {
+    "KTM": 1.7
+   },
+   "flight_cost": 1.0
+  },
+  {
+   "id": "weak_yen",
+   "label": "Weak yen boosts Japan",
+   "description": "A weak yen lifts Tokyo demand by 40%.",
+   "demand": {
+    "TYO": 1.4
+   },
+   "sigma": {},
+   "flight_cost": 1.0
+  },
+  {
+   "id": "schengen_delay",
+   "label": "Schengen visa delays",
+   "description": "Visa appointment backlogs cut Paris demand by 25% and add uncertainty.",
+   "demand": {
+    "PAR": 0.75
+   },
+   "sigma": {
+    "PAR": 1.3
+   },
+   "flight_cost": 1.0
+  },
+  {
+   "id": "hajj_quota",
+   "label": "Bigger Hajj quota for India",
+   "description": "A larger Hajj quota lifts Makkah demand by 25%.",
+   "demand": {
+    "MKK": 1.25
+   },
+   "sigma": {},
+   "flight_cost": 1.0
+  }
+ ]
+}

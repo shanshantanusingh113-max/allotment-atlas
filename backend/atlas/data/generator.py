@@ -20,10 +20,10 @@ from datetime import date, timedelta
 import numpy as np
 import pandas as pd
 
-from .catalog import DESTINATIONS, EVENTS, Destination
+from .catalog import DESTINATIONS, EVENTS, META, Destination
 
-HISTORY_START = date(2024, 11, 4)  # a Monday
-HISTORY_END = date(2026, 11, 1)  # the Sunday before the planning horizon
+HISTORY_START = date.fromisoformat(META.get("history_start", "2024-11-04"))  # a Monday
+HISTORY_END = date.fromisoformat(META.get("history_end", "2026-11-01"))  # day before the plan date
 ANNUAL_GROWTH = 0.16
 WEEKDAY = np.array([0.88, 0.86, 0.9, 0.97, 1.12, 1.2, 1.07])  # Mon..Sun
 

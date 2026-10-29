@@ -17,7 +17,8 @@ def test_health(client):
 
 def test_destinations_and_forecast(client):
     dests = client.get("/api/destinations").json()
-    assert len(dests) == 16
+    from atlas.data.catalog import DESTINATIONS
+    assert len(dests) == len(DESTINATIONS) >= 28
     f = client.get("/api/forecast/goi").json()
     assert f["dest"] == "GOI" and len(f["forecast"]) >= 52
     assert client.get("/api/forecast/XXX").status_code == 404

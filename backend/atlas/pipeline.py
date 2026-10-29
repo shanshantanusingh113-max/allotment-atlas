@@ -14,7 +14,7 @@ import pandas as pd
 
 from . import __version__
 from . import analysis
-from .data.catalog import (BLOCK_BY_ID, BLOCKS, DEST_BY_CODE, DESTINATIONS, HUBS, SHOCK_BY_ID,
+from .data.catalog import (BLOCK_BY_ID, BLOCKS, DEST_BY_CODE, DESTINATIONS, EVENTS, HUBS, META, SHOCK_BY_ID,
                            SHOCKS, Block)
 from .data.generator import generate_history, weekly
 from .explain import explain_pick, explain_skip
@@ -22,7 +22,7 @@ from .forecast.model import DemandForecaster, backtest
 from .optimize import newsvendor, portfolio, timing
 from .risk.montecarlo import Position, simulate
 
-PLAN_DATE = date(2026, 11, 2)
+PLAN_DATE = date.fromisoformat(META.get("plan_date", "2026-11-02"))
 HORIZON_WEEKS = 56
 Z90 = 1.2816
 MARKET_CV_BASE = 0.10
@@ -39,9 +39,10 @@ class OptimizeRequest:
 
 
 class Engine:
-    def __init__(self, seed: int = 7):
+    def __init__(self, seed: int = 7, history: pd.DataFrame | None = None):
+        """Build the engine on synthetic history, or on your own daily history (see data/loaders.py)."""
         self.seed = seed
-        self.history = generate_history(seed)
+        self.history = history if history is not None else generate_history(seed)
         self.weekly = weekly(self.history)
         self.forecaster = DemandForecaster().fit(self.weekly)
         self.forecast = self.forecaster.forecast_all(PLAN_DATE, HORIZON_WEEKS)
@@ -282,6 +283,11 @@ class Engine:
             "backtest": self.backtest,
             "default_plan": default,
             "default_sensitivity": self.sensitivity(OptimizeRequest()),
+            "catalog": {
+                "meta": META,
+                "events": [{"name": e.name, "start": str(e.start), "end": str(e.end), "intensity": e.intensity,
+                            "destinations": list(e.destinations)} for e in EVENTS],
+            },
         }
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, separators=(",", ":"), default=str))
