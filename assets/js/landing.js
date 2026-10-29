@@ -9,16 +9,66 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const RISK = { 0: 'Bold', 0.5: 'Balanced', 1: 'Careful' };
-let engine, snap;
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+const inWords = n => n <= 20 ? WORDS[n] : n < 100 ? `${['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'][Math.floor(n / 10)]}${n % 10 ? '-' + WORDS[n % 10] : ''}` : String(n);
+let engine, snap, globe;
 
 async function boot() {
-  try { ({ engine, snapshot: snap } = await connect()); } catch (e) { console.error(e); return; }
+  const intro = document.documentElement.classList.contains('intro-pending') ? startIntro() : null;
+  try { ({ engine, snapshot: snap } = await connect()); } catch (e) { console.error(e); finishIntro(); return; }
+  if (intro) await intro(snap); else document.documentElement.classList.add('intro-done');
   fillNumbers();
-  try { initGlobe($('globe')); } catch (e) { console.error(e); }
+  try { globe = initGlobe($('globe')); globe.enter(); } catch (e) { console.error(e); }
   bindTry(); runTry();
   charts.backtestChart($('bt'), snap.backtest, Object.fromEntries(snap.destinations.map(d => [d.code, d.name])));
   $('btCap').textContent = `model ${(snap.backtest.model_wape * 100).toFixed(1)}% vs naive ${(snap.backtest.naive_wape * 100).toFixed(1)}%`;
   runScore();
+}
+
+// ------------------------------------------------------------ opening sequence
+let introDone = null;
+function startIntro() {
+  const el = $('intro'), arc = $('introArc'), plane = $('introPlane'), bar = $('introBar'), cap = $('introCap');
+  const len = arc.getTotalLength(), t0 = performance.now();
+  let raf;
+  const fly = now => {
+    const p = Math.min(1, (now - t0) / 2100), e = 1 - (1 - p) ** 2, pt = arc.getPointAtLength(e * len);
+    plane.setAttribute('cx', pt.x); plane.setAttribute('cy', pt.y);
+    arc.style.strokeDashoffset = `${-e * 60}`;
+    bar.style.width = `${e * 100}%`;
+    if (p < 1) raf = requestAnimationFrame(fly);
+  };
+  raf = requestAnimationFrame(fly);
+  const done = new Promise(res => { introDone = res; });
+  const skip = () => finishIntro();
+  el.addEventListener('click', skip, { once: true });
+  addEventListener('keydown', e => { if (e.key === 'Escape') skip(); }, { once: true });
+  return async data => {
+    const daily = data.datasets?.find(d => d.file === 'daily_history.csv');
+    const steps = [
+      `Reading <b>${daily ? daily.rows.toLocaleString('en-IN') : 'two years of'}</b> days of history`,
+      `Forecasting <b>${data.destinations.length}</b> destinations`,
+      `Sizing <b>${data.candidates.length}</b> inventory blocks`,
+      `Simulating <b>10,000</b> seasons`,
+      `Plan ready: <b>${inr(data.default_plan.summary.expected_profit)}</b> expected profit`,
+    ];
+    for (const [i, s] of steps.entries()) {
+      if (!document.documentElement.classList.contains('intro-pending')) break;
+      cap.innerHTML = s;
+      await new Promise(r => setTimeout(r, i === steps.length - 1 ? 520 : 330));
+    }
+    cancelAnimationFrame(raf);
+    finishIntro();
+    return done;
+  };
+}
+function finishIntro() {
+  const el = $('intro'), root = document.documentElement;
+  if (!root.classList.contains('intro-pending')) { introDone?.(); return; }
+  try { sessionStorage.setItem('atlas.intro', '1'); } catch (_) { /* private mode */ }
+  el.classList.add('out');
+  root.classList.add('intro-done');
+  setTimeout(() => { root.classList.remove('intro-pending'); introDone?.(); }, 420);
 }
 
 // ------------------------------------------------------------ numbers
@@ -29,6 +79,7 @@ function countUp(el, to, fmt) {
   requestAnimationFrame(step);
 }
 function fillNumbers() {
+  $('nDest').textContent = inWords(snap.destinations.length);
   const plan = snap.default_plan, s = plan.summary, r = plan.risk, bt = snap.backtest;
   const q = sel => document.querySelector(`[data-count="${sel}"]`);
   countUp(q('expected_profit'), s.expected_profit, inr);
@@ -134,6 +185,12 @@ function initGlobe(host) {
   }
   earth.quaternion.setFromUnitVectors(ll(20, 78, 1).normalize(), new THREE.Vector3(0, 0.2, 1).normalize());
 
+  const arcs = earth.children.filter(o => o.geometry && o.geometry.type === 'TubeGeometry');
+  arcs.forEach(a => a.geometry.setDrawRange(0, 0));
+  let entering = null;
+  const enter = () => { entering = performance.now(); };
+  earth.scale.setScalar(reduce ? 1 : 0.35);
+  const restQ = earth.quaternion.clone();
   const months = snap.destinations[0].monthly.map(m => m.month);
   let mi = 1, last = performance.now(), acc = 0;
   const setMonth = i => { mi = i; const [y, m] = months[i].split('-').map(Number); $('gMonth').textContent = `${MON[m - 1]} ${y}`;
@@ -144,6 +201,14 @@ function initGlobe(host) {
   let visible = true; new IntersectionObserver(es => es.forEach(e => { visible = e.isIntersecting; })).observe(host);
   (function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (entering !== null) {
+      const p = Math.min(1, (now - entering) / 1600), e = 1 - (1 - p) ** 3;
+      earth.scale.setScalar(0.35 + 0.65 * e);
+      earth.quaternion.copy(restQ).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), (1 - e) * -2.2));
+      const draw = Math.min(1, Math.max(0, (now - entering - 500) / 1400));
+      arcs.forEach(a => a.geometry.setDrawRange(0, Math.floor(a.geometry.index.count * draw / 3) * 3));
+      if (p >= 1 && draw >= 1) entering = null;
+    }
     if (visible) {
       acc += dt; if (!reduce && acc > 1.8) { acc = 0; setMonth((mi + 1) % months.length); }
       for (const b of bars) { b.h += (b.target - b.h) * Math.min(1, dt * (reduce ? 60 : 4)); b.mesh.scale.set(1, Math.max(0.01, b.h), 1); }
@@ -152,6 +217,7 @@ function initGlobe(host) {
     }
     requestAnimationFrame(loop);
   })(last);
+  return { enter: () => (reduce ? arcs.forEach(a => a.geometry.setDrawRange(0, Infinity)) : enter()) };
 }
 
 boot();

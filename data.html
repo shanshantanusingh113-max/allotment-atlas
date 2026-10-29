@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Atlas Dataset</title>
+<meta name="description" content="Explore and download the Allotment Atlas dataset: destinations, daily history, forecasts, events, inventory blocks and the catalog.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/planner.css">
+<link rel="stylesheet" href="assets/css/data.css">
+<link rel="stylesheet" href="assets/css/transitions.css">
+</head>
+<body>
+<nav class="nav" aria-label="Pages">
+  <div class="wrap">
+    <a class="brand" href="index.html">Atlas</a>
+    <div class="pages">
+      <a href="planner.html">Buy Planner</a>
+      <a href="data.html" aria-current="page">Data</a>
+      <a href="lab.html">3D Lab</a>
+      <a href="walkthrough.html">Walkthrough</a>
+    </div>
+  </div>
+</nav>
+
+<header class="wrap head">
+  <div class="eyebrow">Dataset · synthetic, documented, downloadable</div>
+  <h1>Everything the engine <span>learns from</span></h1>
+  <p>Two years of daily history for every destination, the event calendar that drives the peaks, the forecasts the model produced, and every inventory block it can buy. Browse it here or download it as CSV.</p>
+  <div class="counts" id="counts"></div>
+</header>
+
+<main>
+<section class="wrap sec t-gold" id="downloads">
+  <div class="sec-head"><div class="eyebrow">01 · Downloads</div><h2>Take the data with you</h2></div>
+  <div class="dl" id="dl"></div>
+</section>
+
+<section class="wrap sec t-blue" id="destinations">
+  <div class="sec-head">
+    <div class="eyebrow">02 · Destinations</div>
+    <h2><span id="nPlaces">Twenty-eight</span> places, twelve months each</h2>
+    <p>The sparkline is the monthly demand profile from January to December. Select a destination to see its weekly history and forecast.</p>
+  </div>
+  <div class="filters" id="regions" role="group" aria-label="Region filter"></div>
+  <div class="split">
+    <div class="tbl"><table>
+      <thead><tr><th>Destination</th><th>Hub</th><th class="r">Last year</th><th class="r">Growth</th><th class="r">Sold out</th><th class="r">ADR</th><th>Jan → Dec</th></tr></thead>
+      <tbody id="dRows"></tbody>
+    </table></div>
+    <div class="card detail" id="dDetail"></div>
+  </div>
+</section>
+
+<section class="wrap sec t-violet" id="events">
+  <div class="sec-head">
+    <div class="eyebrow">03 · Event calendar</div>
+    <h2>The dates that move demand</h2>
+    <p>Each row is an event type; each bar is one occurrence. Darker bars lift demand more. Festivals that move between years, like Diwali, Holi and Ramadan, are why the forecaster beats a simple last-year copy.</p>
+  </div>
+  <div class="card"><svg class="chart" id="evChart" viewBox="0 0 900 420" role="img" aria-label="Event calendar from 2024 to 2027"></svg></div>
+</section>
+
+<section class="wrap sec t-coral" id="blocks">
+  <div class="sec-head">
+    <div class="eyebrow">04 · Inventory blocks</div>
+    <h2>Every bet the engine can place</h2>
+    <p>Select a column to sort. Critical ratio near 0.5 means a sale earns about as much as an unsold unit loses.</p>
+  </div>
+  <div class="tbl"><table id="bTable">
+    <thead><tr>
+      <th data-k="label">Block</th><th data-k="window_start">Stay window</th><th class="r" data-k="mu">Demand P50</th>
+      <th class="r" data-k="cost">Cost</th><th class="r" data-k="price">Price</th><th class="r" data-k="salvage">Recovery</th>
+      <th class="r" data-k="critical_ratio">Critical ratio</th><th class="r" data-k="q_star">Q*</th><th class="r" data-k="expected_profit">Exp. profit at Q*</th>
+    </tr></thead>
+    <tbody id="bRows"></tbody>
+  </table></div>
+</section>
+
+<section class="wrap sec t-green" id="byod">
+  <div class="sec-head">
+    <div class="eyebrow">05 · Bring your own data</div>
+    <h2>Swap in a real dataset</h2>
+    <p>The engine reads a JSON catalog and, optionally, a daily history CSV. Replace either and every page updates.</p>
+  </div>
+  <div class="grid2">
+    <div class="card" style="display:grid;gap:10px;align-content:start">
+      <div class="cap"><b>History CSV · required columns</b></div>
+      <div class="schema">
+        <div><code>date</code><span>stay date, YYYY-MM-DD</span></div>
+        <div><code>dest</code><span>destination code in the catalog</span></div>
+        <div><code>bookings</code><span>units sold for that stay date</span></div>
+        <div><code>lost</code><span>searches that ended on sold-out (0 if unknown)</span></div>
+      </div>
+      <p class="muted" style="font-size:.86rem">Optional: <code>searches</code>, <code>cancellations</code>, <code>adr</code>, <code>event_intensity</code>. At least 400 days are needed to learn a yearly pattern.</p>
+    </div>
+    <div class="card" style="display:grid;gap:10px;align-content:start">
+      <div class="cap"><b>Run it</b></div>
+      <div class="api-box">cd backend
+ATLAS_CATALOG=my_catalog.json \
+python -m scripts.run_custom \
+  --history my_history.csv \
+  --out ../frontend/data/atlas.json</div>
+      <p class="muted" style="font-size:.86rem">The catalog is checked before anything runs: unknown destinations, prices below cost and overlapping ids are reported with a clear message.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><div class="eyebrow">Allotment Atlas</div><p>All data is synthetic, generated for the TBO Hackathon. No real TBO, customer or supplier data is used. <a href="https://github.com/shanshantanusingh113-max/allotment-atlas" target="_blank" rel="noopener">Source on GitHub</a></p></div></footer>
+
+<script type="module" src="assets/js/data.js"></script>
+<script src="assets/js/transitions.js"></script>
+</body>
+</html>

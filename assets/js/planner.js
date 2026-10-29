@@ -32,9 +32,13 @@ async function boot() {
   pill.title = engine.mode === 'api' ? `Answered by the Python service at ${engine.base}` : 'Running the exported model snapshot in your browser. Add ?api=<url> to use the live service.';
   $('apiState').textContent = engine.mode === 'api' ? `connected to ${engine.base}` : 'not connected · using the browser engine';
   $('planEyebrow').textContent = `Buy Planner · plan date ${fmtDate(parse(snap.generated_for))}`;
+  const words = n => ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'][n]
+    ?? `${['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'][Math.floor(n / 10)]}${n % 10 ? '-' + ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][n % 10] : ''}`;
+  const cap = w => w[0].toUpperCase() + w.slice(1);
+  $('nBlocks').textContent = cap(words(snap.candidates.length)); $('nDests').textContent = words(snap.destinations.length);
 
   const qp = new URLSearchParams(location.search);
-  if (qp.has('budget')) state.budget = Math.max(100, Math.min(1500, Math.round(+qp.get('budget') / 10) * 10)) || DEFAULTS.budget;
+  if (qp.has('budget')) state.budget = Math.max(100, Math.min(2000, Math.round(+qp.get('budget') / 10) * 10)) || DEFAULTS.budget;
   if (qp.has('risk') && [0, 0.5, 1, 2].includes(+qp.get('risk'))) state.risk = +qp.get('risk');
   if (qp.has('share')) state.share = Math.max(0.15, Math.min(1, +qp.get('share'))) || DEFAULTS.share;
   if (qp.get('shocks')) qp.get('shocks').split(',').filter(id => snap.shocks.some(s => s.id === id)).forEach(id => state.shocks.add(id));
@@ -80,7 +84,8 @@ function setMonth(i) {
   globe?.setMonth(i);
 }
 function buildShocks() {
-  const colors = { gulf_advisory: 'var(--coral)', vietnam_visa: 'var(--green)', cyclone: 'var(--coral)', bangkok_concert: 'var(--green)', fuel_spike: 'var(--coral)' };
+  const colors = { gulf_advisory: 'var(--coral)', vietnam_visa: 'var(--green)', cyclone: 'var(--coral)', bangkok_concert: 'var(--green)', fuel_spike: 'var(--coral)',
+    nepal_quake: 'var(--coral)', weak_yen: 'var(--green)', schengen_delay: 'var(--coral)', hajj_quota: 'var(--green)' };
   for (const s of snap.shocks) {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'tog'; b.dataset.id = s.id; b.title = s.description;
@@ -390,11 +395,12 @@ function initGlobe(host) {
 // ------------------------------------------------------------ command bar
 const MONTH_WORDS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 const SHOCK_WORDS = [
-  [/gulf|dubai|advisory/, 'gulf_advisory'], [/vietnam|visa|da ?nang/, 'vietnam_visa'],
+  [/gulf|dubai|advisory/, 'gulf_advisory'], [/vietnam|da ?nang|visa-free/, 'vietnam_visa'],
   [/cyclone|storm|typhoon/, 'cyclone'], [/concert|stadium|bangkok/, 'bangkok_concert'], [/fuel|oil|jet/, 'fuel_spike'],
+  [/nepal|quake|earthquake|kathmandu/, 'nepal_quake'], [/yen|japan|tokyo/, 'weak_yen'], [/schengen|paris|europe visa/, 'schengen_delay'], [/hajj/, 'hajj_quota'],
 ];
 const toLakh = (n, unit) => /^l/.test(unit) ? n : n * 100;
-const clampBudget = l => Math.max(100, Math.min(1500, Math.round(l / 10) * 10));
+const clampBudget = l => Math.max(100, Math.min(2000, Math.round(l / 10) * 10));
 
 export function interpret(text) {
   const t = ` ${text.toLowerCase().replace(/[,;]+/g, ' , ')} `, said = [], fx = [];
